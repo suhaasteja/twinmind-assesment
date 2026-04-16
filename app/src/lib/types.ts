@@ -1,0 +1,48 @@
+export type SuggestionType =
+  | "question"
+  | "talking_point"
+  | "answer"
+  | "fact_check"
+  | "clarify";
+
+export interface Suggestion {
+  id: string;
+  type: SuggestionType;
+  title: string;
+  preview: string;
+}
+
+export interface SuggestionBatch {
+  id: string;
+  createdAt: number;
+  suggestions: Suggestion[];
+}
+
+export interface TranscriptChunk {
+  id: string;
+  startedAt: number;
+  endedAt: number;
+  text: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  createdAt: number;
+  // When seeded from a suggestion click
+  fromSuggestion?: { type: SuggestionType; title: string };
+}
+
+export interface Settings {
+  apiKey: string;
+  suggestionsPrompt: string;
+  detailedAnswerPrompt: string;
+  chatPrompt: string;
+  suggestionsContextMinutes: number; // how many recent minutes of transcript to send
+  detailedContextMinutes: number;    // 0 = full transcript
+  autoRefreshSeconds: number;        // interval between auto-refreshes
+  chunkSeconds: number;              // MediaRecorder timeslice
+  sttModel: string;
+  llmModel: string;
+}
