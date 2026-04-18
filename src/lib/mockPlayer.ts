@@ -31,17 +31,28 @@ function packChunks(
   const out: PackedChunk[] = [];
   let buf: string[] = [];
   let bufDur = 0;
+  let lastSpeaker: string | null = null;
+
+  const flush = () => {
+    if (buf.length) out.push({ text: buf.join("\n"), durationSec: bufDur });
+    buf = [];
+    bufDur = 0;
+    lastSpeaker = null;
+  };
 
   for (const line of scenario.lines) {
-    buf.push(line.text);
-    bufDur += line.durationSec;
-    if (bufDur >= chunkSeconds) {
-      out.push({ text: buf.join(" "), durationSec: bufDur });
-      buf = [];
-      bufDur = 0;
+    // Collapse consecutive lines from the same speaker into one paragraph;
+    // otherwise prefix with "Speaker: ".
+    if (line.speaker === lastSpeaker && buf.length) {
+      buf[buf.length - 1] = `${buf[buf.length - 1]} ${line.text}`;
+    } else {
+      buf.push(`${line.speaker}: ${line.text}`);
+      lastSpeaker = line.speaker;
     }
+    bufDur += line.durationSec;
+    if (bufDur >= chunkSeconds) flush();
   }
-  if (buf.length) out.push({ text: buf.join(" "), durationSec: bufDur });
+  flush();
   return out;
 }
 

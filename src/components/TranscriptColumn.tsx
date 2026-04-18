@@ -239,12 +239,12 @@ export function TranscriptColumn() {
         className="scrollbar mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-4 text-[14px] leading-relaxed"
       >
         {chunks.map((c) => (
-          <p key={c.id} className="text-[var(--fg)]">
+          <div key={c.id} className="text-[var(--fg)]">
             <span className="mr-2 text-[12px] text-[var(--muted-2)]">
               {formatClock(c.startedAt)}
             </span>
-            {c.text}
-          </p>
+            <span className="whitespace-pre-wrap">{c.text}</span>
+          </div>
         ))}
         {chunks.length === 0 && !active && (
           <div className="mt-8 text-center text-[13px] text-[var(--muted-2)]">
