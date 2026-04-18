@@ -25,6 +25,8 @@ const DEFAULT_SETTINGS: Settings = {
   chunkSeconds: 30,
   sttModel: "whisper-large-v3",
   llmModel: "openai/gpt-oss-120b",
+  mockSpeed: 1,
+  mockScenarioId: "infra",
 };
 
 // ---- Settings store (persisted to localStorage) ----
@@ -63,6 +65,7 @@ export const useSettings = create<SettingsState>()(
 interface SessionState {
   sessionStartedAt: number;
   recording: boolean;
+  mockActive: boolean;
   chunks: TranscriptChunk[];
   batches: SuggestionBatch[];
   chat: ChatMessage[];
@@ -70,6 +73,7 @@ interface SessionState {
   chatStreaming: boolean;
 
   setRecording: (v: boolean) => void;
+  setMockActive: (v: boolean) => void;
   addChunk: (c: TranscriptChunk) => void;
   addBatch: (b: SuggestionBatch) => void;
   addChatMessage: (m: ChatMessage) => void;
@@ -82,12 +86,14 @@ interface SessionState {
 export const useSession = create<SessionState>((set) => ({
   sessionStartedAt: Date.now(),
   recording: false,
+  mockActive: false,
   chunks: [],
   batches: [],
   chat: [],
   loadingSuggestions: false,
   chatStreaming: false,
   setRecording: (v) => set({ recording: v }),
+  setMockActive: (v) => set({ mockActive: v }),
   addChunk: (c) => set((s) => ({ chunks: [...s.chunks, c] })),
   addBatch: (b) => set((s) => ({ batches: [b, ...s.batches] })),
   addChatMessage: (m) => set((s) => ({ chat: [...s.chat, m] })),
@@ -103,6 +109,7 @@ export const useSession = create<SessionState>((set) => ({
     set({
       sessionStartedAt: Date.now(),
       recording: false,
+      mockActive: false,
       chunks: [],
       batches: [],
       chat: [],

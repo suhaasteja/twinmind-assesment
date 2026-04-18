@@ -14,6 +14,8 @@ export function SuggestionsColumn({
 }) {
   const settings = useSettings((s) => s.settings);
   const recording = useSession((s) => s.recording);
+  const mockActive = useSession((s) => s.mockActive);
+  const active = recording || mockActive;
   const chunks = useSession((s) => s.chunks);
   const batches = useSession((s) => s.batches);
   const addBatch = useSession((s) => s.addBatch);
@@ -83,9 +85,9 @@ export function SuggestionsColumn({
     }
   };
 
-  // Auto-refresh loop while recording.
+  // Auto-refresh loop while recording OR mock is playing.
   useEffect(() => {
-    if (!recording) return;
+    if (!active) return;
     const interval = setInterval(() => {
       setCountdown((c) => {
         if (c <= 1) {
@@ -97,12 +99,12 @@ export function SuggestionsColumn({
     }, 1000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recording, settings.autoRefreshSeconds, chunks.length]);
+  }, [active, settings.autoRefreshSeconds, chunks.length]);
 
-  // Reset countdown when recording starts.
+  // Reset countdown when a source becomes active.
   useEffect(() => {
-    if (recording) setCountdown(settings.autoRefreshSeconds);
-  }, [recording, settings.autoRefreshSeconds]);
+    if (active) setCountdown(settings.autoRefreshSeconds);
+  }, [active, settings.autoRefreshSeconds]);
 
   return (
     <Panel className="h-full">
@@ -128,7 +130,7 @@ export function SuggestionsColumn({
           Reload suggestions
         </button>
         <div className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
-          {recording ? `auto-refresh in ${countdown}s` : "paused"}
+          {active ? `auto-refresh in ${countdown}s` : "paused"}
         </div>
       </div>
 

@@ -279,7 +279,18 @@ The single `/api/chat` endpoint handles both typed-chat and detailed-answer path
 
 ---
 
-## 9. What would change with a real backend
+## 9. Mock mode (for testing without a mic)
+
+A second **"▶ Play mock"** button in the transcript column streams a hand-written scenario into `useSession.chunks` at the same cadence a real meeting would produce. No mic, no Whisper call.
+
+- Scenarios live in `src/lib/mockTranscripts.ts` (currently three: infra scaling, product kickoff, 1:1).
+- Playback is driven by `src/lib/mockPlayer.ts`, which packs lines into ~`chunkSeconds` chunks and `setTimeout`s each one at `chunkSeconds * 1000 / mockSpeed` ms.
+- `useSession.mockActive` is a separate flag from `recording`. The suggestion loop now gates on `recording || mockActive`, so everything downstream (auto-refresh, chat, export) exercises identically to a real session.
+- `mockSpeed` (1× / 2× / 5× / 10×) lets you compress a ~3-minute script into ~18s for fast iteration.
+- Status badge switches to amber **MOCK** so demo data is never confused with a real meeting.
+- No API route changes — `/api/transcribe` is simply bypassed.
+
+## 10. What would change with a real backend
 
 For the assignment this is deliberately overkill, but the natural path if you wanted multi-device / resumable sessions:
 

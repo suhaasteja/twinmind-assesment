@@ -45,4 +45,6 @@ export interface Settings {
   chunkSeconds: number;              // MediaRecorder timeslice
   sttModel: string;
   llmModel: string;
+  mockSpeed: number; // 1 = realtime, 2/5/10 = faster playback
+  mockScenarioId: string;
 }
