@@ -47,4 +47,10 @@ export interface Settings {
   llmModel: string;
   mockSpeed: number; // 1 = realtime, 2/5/10 = faster playback
   mockScenarioId: string;
+
+  // --- Adaptive cadence (see ADAPTIVE_CADENCE.md) -------------------------
+  minRefreshIntervalMs: number;         // cooldown between any two /api/suggest calls (auto/interrupt)
+  inflightDeferMs: number;              // max ms to wait on in-flight transcribes before firing anyway
+  dedupJaccardThreshold: number;        // skip refresh when window similarity exceeds this
+  transcribeErrorCircuitBreaker: number; // consecutive transcribe errors that pause auto-refresh
 }

@@ -144,6 +144,89 @@ export function SettingsDialog({
             />
           </Field>
 
+          <div>
+            <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+              Adaptive cadence
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Field
+                label="Min refresh interval (ms)"
+                hint="Cooldown between auto/interrupt /api/suggest calls. Manual reload bypasses."
+              >
+                <input
+                  type="number"
+                  min={0}
+                  max={60_000}
+                  step={1000}
+                  value={draft.minRefreshIntervalMs}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      minRefreshIntervalMs: Number(e.target.value),
+                    })
+                  }
+                  className={inputCls}
+                />
+              </Field>
+              <Field
+                label="In-flight defer (ms)"
+                hint="Max wait for a running transcribe before firing anyway."
+              >
+                <input
+                  type="number"
+                  min={0}
+                  max={30_000}
+                  step={500}
+                  value={draft.inflightDeferMs}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      inflightDeferMs: Number(e.target.value),
+                    })
+                  }
+                  className={inputCls}
+                />
+              </Field>
+              <Field
+                label="Dedup similarity threshold"
+                hint="Skip refresh when window Jaccard similarity exceeds this (0–1)."
+              >
+                <input
+                  type="number"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={draft.dedupJaccardThreshold}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      dedupJaccardThreshold: Number(e.target.value),
+                    })
+                  }
+                  className={inputCls}
+                />
+              </Field>
+              <Field
+                label="Transcribe error circuit breaker"
+                hint="Consecutive transcribe errors that pause auto-refresh (0 = disabled)."
+              >
+                <input
+                  type="number"
+                  min={0}
+                  max={20}
+                  value={draft.transcribeErrorCircuitBreaker}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      transcribeErrorCircuitBreaker: Number(e.target.value),
+                    })
+                  }
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+          </div>
+
           <Field label="Live suggestions prompt">
             <textarea
               rows={10}

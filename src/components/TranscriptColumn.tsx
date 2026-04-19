@@ -18,6 +18,10 @@ export function TranscriptColumn() {
   const setMockActive = useSession((s) => s.setMockActive);
   const addChunk = useSession((s) => s.addChunk);
   const chunks = useSession((s) => s.chunks);
+  const incInflight = useSession((s) => s.incInflight);
+  const decInflight = useSession((s) => s.decInflight);
+  const recordTranscribeResult = useSession((s) => s.recordTranscribeResult);
+  const resetTranscribeErrors = useSession((s) => s.resetTranscribeErrors);
 
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(0);
@@ -40,6 +44,8 @@ export function TranscriptColumn() {
       return;
     }
     setPending((p) => p + 1);
+    incInflight();
+    let ok = false;
     try {
       const fd = new FormData();
       fd.append("file", blob, "chunk.webm");
@@ -54,12 +60,15 @@ export function TranscriptColumn() {
         setError(data.error || `Transcribe failed (${res.status})`);
         return;
       }
+      ok = true;
       const text = (data.text ?? "").trim();
       if (text) addChunk({ id: uid(), startedAt, endedAt, text });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Transcribe error");
     } finally {
       setPending((p) => Math.max(0, p - 1));
+      decInflight();
+      recordTranscribeResult(ok);
     }
   };
 
@@ -71,6 +80,7 @@ export function TranscriptColumn() {
 
   const startMic = async () => {
     setError(null);
+    resetTranscribeErrors();
     if (mockActive) stopMock();
     if (!settings.apiKey) {
       setError("Paste your Groq API key in Settings first.");
