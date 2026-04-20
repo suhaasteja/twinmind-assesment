@@ -26,7 +26,7 @@ const DEFAULT_SETTINGS: Settings = {
   sttModel: "whisper-large-v3",
   llmModel: "openai/gpt-oss-120b",
   mockSpeed: 1,
-  mockScenarioId: "infra",
+  mockScenarioId: "podcast",
   meetingKind: "general",
 
   // Adaptive cadence defaults — tuned in ADAPTIVE_CADENCE.md §5.

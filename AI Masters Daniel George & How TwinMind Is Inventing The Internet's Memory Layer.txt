@@ -1,0 +1,2659 @@
+00:00 hey there everybody today we are joined
+00:02 
+
+00:02 by Daniel George CEO and co-founder of
+00:04 
+
+00:04 twin mind the first personalized
+00:06 
+
+00:06 proactive and always on AI That's
+00:08 
+
+00:08 essentially like Jarvis from Iron Man
+00:11 
+
+00:11 now it continuously learns you and makes
+00:13 
+
+00:13 it something you never forget about
+00:15 
+
+00:15 memory essentially making your past
+00:17 
+
+00:17 conversational now his teamwork is
+00:19 
+
+00:19 responsible for over a billion dollars
+00:20 
+
+00:20 of Revenue impact on Wall Street and
+00:22 
+
+00:22 some Nobel prize winning discoveries
+00:24 
+
+00:24 which I hope we get into it's incredible
+00:27 
+
+00:27 now Daniel worked at Google X as an AI
+00:29 
+
+00:29 research scientist JP Wolfram among
+00:32 
+
+00:32 others and he had a PhD in Ai and
+00:34 
+
+00:34 astrophysics with more than 50,000
+00:36 
+
+00:36 citations to his work now the technology
+00:39 
+
+00:39 behind twin mind specifically I have to
+00:41 
+
+00:41 say is incredible and that's what I
+00:43 
+
+00:43 would love to touch on in this
+00:45 
+
+00:45 conversation now George welcome thanks
+00:47 
+
+00:47 for having me on it's an absolute
+00:49 
+
+00:49 pleasure to have you on so tell us
+00:51 
+
+00:51 what's the story behind twin
+00:53 
+
+00:53 mind yes so in early like 2010 like we W
+00:58 
+
+00:58 I watched this movie uh about Iron Man
+00:60 
+
+00:60 and Jarvis right you've all seen it
+01:03 
+
+01:03 right and the vision of Jarvis is what I
+01:05 
+
+01:05 thought something like chat GPT would be
+01:07 
+
+01:07 but it's still like really far off you
+01:09 
+
+01:09 know Jarvis just knows everything about
+01:11 
+
+01:11 you it knows your past what you're going
+01:13 
+
+01:13 through right now it's he's around and
+01:15 
+
+01:15 actually understands what your
+01:17 
+
+01:17 priorities are what you're working
+01:18 
+
+01:18 towards what's coming up soon and it's
+01:21 
+
+01:21 like always there always by your side
+01:23 
+
+01:23 that is like and then chat GPT and like
+01:25 
+
+01:25 all these apps are super useful but it's
+01:27 
+
+01:27 like a it's like using V like dos in the
+01:30 
+
+01:30 1980s where you have this little
+01:32 
+
+01:32 terminal you type these commands in you
+01:34 
+
+01:34 geted out but this is not the real
+01:37 
+
+01:37 personal AI Vision that I always wanted
+01:40 
+
+01:40 so that's why we were building twin mind
+01:42 
+
+01:42 to be this like always on proactive AI
+01:45 
+
+01:45 with like Perfect Memory of life so
+01:48 
+
+01:48 that's how we got started and I got my
+01:50 
+
+01:50 co-founders who have been working
+01:52 
+
+01:52 together with at Google X I got them all
+01:54 
+
+01:54 excited about this we all had this
+01:56 
+
+01:56 passion and we started working on it in
+01:58 
+
+01:58 20 early 2024
+02:00 
+
+02:00 right right and how how did that happen
+02:02 
+
+02:02 I mean what was that conversation like
+02:04 
+
+02:04 when you first approached them with the
+02:05 
+
+02:05 idea so we've been friends for a long
+02:07 
+
+02:07 time so all of us worked together at
+02:09 
+
+02:09 Google in 2019 and we immediately
+02:12 
+
+02:12 because we had the shared passion for AI
+02:14 
+
+02:14 and we were just like you know uh just
+02:17 
+
+02:17 geek out about talking about this how
+02:18 
+
+02:18 the world could be simulation and the
+02:20 
+
+02:20 Matrix and how like we want like maybe
+02:23 
+
+02:23 we are all like AI characters in a video
+02:25 
+
+02:25 game we could all be NPCs and some
+02:28 
+
+02:28 future world where we are all having
+02:30 
+
+02:30 like a chat GPT version 10 in our heads
+02:33 
+
+02:33 running right now so we had all these
+02:35 
+
+02:35 crazy conversations we've always been
+02:36 
+
+02:36 obsessed with AI so in uh 2022 end of
+02:40 
+
+02:40 2022 chat GPT came out and and early
+02:42 
+
+02:42 2023 we've all started using it and we
+02:45 
+
+02:45 were like wow this is not what we wanted
+02:47 
+
+02:47 and all of us are saying the same thing
+02:49 
+
+02:49 it was a pretty easy transition to be
+02:51 
+
+02:51 like hey why don't we just build what we
+02:53 
+
+02:53 wanted because we had seen people doing
+02:55 
+
+02:55 these same things like trying to get
+02:57 
+
+02:57 chat gbt to run all day so they would
+02:59 
+
+02:59 like trans their speech using a simple
+03:02 
+
+03:02 script and then they would like just
+03:04 
+
+03:04 every 20 seconds tell chat gbt Hey
+03:06 
+
+03:06 listen to my conversation and send the
+03:07 
+
+03:07 transcript and then imagine I'm a
+03:09 
+
+03:09 software engineer in a work conversation
+03:12 
+
+03:12 give me some bullet points on what to
+03:13 
+
+03:13 say so I can sound smarter I had a
+03:15 
+
+03:15 friend who built this thing right trying
+03:18 
+
+03:18 to like hack together a version of chgb
+03:20 
+
+03:20 it's kind of like jaar is always on but
+03:22 
+
+03:22 it didn't work so well because it didn't
+03:24 
+
+03:24 have the memory and the latency was like
+03:26 
+
+03:26 20 seconds so we were like why don't we
+03:28 
+
+03:28 build this quick and we build something
+03:30 
+
+03:30 with 3C that listens to you all day wow
+03:35 
+
+03:35 so how did you make that possible
+03:37 
+
+03:37 because the current version chbt CLA
+03:40 
+
+03:40 perplexity none of those are actually on
+03:42 
+
+03:42 all the
+03:43 
+
+03:43 time yes so we are so I can go into the
+03:47 
+
+03:47 technical details so we have a iPhone
+03:49 
+
+03:49 app where we have this like super low
+03:51 
+
+03:51 latency high accuracy transcription
+03:53 
+
+03:53 happening continuously on edge on your
+03:56 
+
+03:56 phone so it's using the Apple silicon to
+03:58 
+
+03:58 continuously transcribe what's happening
+03:60 
+
+03:60 and we also have a cloud mode if you
+04:01 
+
+04:01 want even higher accuracy and you are
+04:03 
+
+04:03 it's not as sensitive of a conversation
+04:05 
+
+04:05 you can still choose a cloud mode and
+04:07 
+
+04:07 it'll transcribe on the cloud with 100
+04:08 
+
+04:08 languages and this is continuously
+04:10 
+
+04:10 happening with less than a second
+04:11 
+
+04:11 latency so every word you say is
+04:14 
+
+04:14 captured in your phone even when it's
+04:15 
+
+04:15 inside your pocket so we have really
+04:18 
+
+04:18 high quality transcription that works
+04:19 
+
+04:19 even when your phone is like inside your
+04:21 
+
+04:21 bag or your pocket or it's like far away
+04:23 
+
+04:23 or you're in a crowded mall or a coffee
+04:26 
+
+04:26 shop or a bar so it can detect the words
+04:29 
+
+04:29 really well and then every F and
+04:31 
+
+04:31 whenever you look at your phone we also
+04:33 
+
+04:33 run an AI model that listen that has the
+04:36 
+
+04:36 transcript of what you just said and
+04:37 
+
+04:37 your P memories and it try tries to help
+04:40 
+
+04:40 you guess what you want to know in this
+04:42 
+
+04:42 moment so this model is training to
+04:44 
+
+04:44 predict what you want to know given the
+04:46 
+
+04:46 context none of the llms out there like
+04:49 
+
+04:49 chat GPT they don't know when to show
+04:51 
+
+04:51 you something and what to show you given
+04:53 
+
+04:53 the context you have to ask explicitly
+04:55 
+
+04:55 each time right right so tell me this
+04:59 
+
+04:59 this a new
+05:01 
+
+05:01 architecture so no weed Foundation
+05:04 
+
+05:04 models to do this task on a bunch of our
+05:07 
+
+05:07 own training data okay so yeah go ahead
+05:10 
+
+05:10 sorry and it has we have also added a
+05:13 
+
+05:13 memory layer so imagine like llms are
+05:15 
+
+05:15 like the intelligence layer right they
+05:17 
+
+05:17 have like really high IQ think of it
+05:20 
+
+05:20 like the chip of a computer like the CPU
+05:23 
+
+05:23 right in the 80s all these companies are
+05:25 
+
+05:25 racing to build the best chips today we
+05:27 
+
+05:27 have all these companies racing to build
+05:29 
+
+05:29 the best llm the intelligence layer but
+05:31 
+
+05:31 that's not enough right to create
+05:32 
+
+05:32 something like a human brain you need
+05:34 
+
+05:34 intelligence and then you need memory
+05:36 
+
+05:36 layer on top of that that has your whole
+05:38 
+
+05:38 life memory and then you need like the
+05:40 
+
+05:40 context capturing layer like your eyes
+05:42 
+
+05:42 and your ears to actually capture what's
+05:44 
+
+05:44 happening in your life all year all day
+05:47 
+
+05:47 right and you need the intent prediction
+05:49 
+
+05:49 like a human knows when is the right
+05:51 
+
+05:51 time to interrupt someone to give them
+05:53 
+
+05:53 some critical information or when to
+05:55 
+
+05:55 step into a conversation or if you're
+05:57 
+
+05:57 talking about something and you're
+05:58 
+
+05:58 looking for Nvidia stock price price and
+06:01 
+
+06:01 I don't know that but then real Jarvis
+06:03 
+
+06:03 would just jump in and be like hey this
+06:05 
+
+06:05 is the number right so llms don't know
+06:08 
+
+06:08 that because you have to write your
+06:09 
+
+06:09 whole thing and you have to click Send
+06:10 
+
+06:10 they're not trained to jump in so it's
+06:13 
+
+06:13 proactive not reative yes proactive so
+06:16 
+
+06:16 there's a proactive layer there's a
+06:18 
+
+06:18 memory layer and then there is like the
+06:20 
+
+06:20 context capturing layer like we had to
+06:22 
+
+06:22 build a lot of optimizations to capture
+06:24 
+
+06:24 those audio all day without killing your
+06:26 
+
+06:26 battery with high accuracy in your
+06:28 
+
+06:28 pocket exactly exactly and that's
+06:30 
+
+06:30 exactly that's one of the main concerns
+06:32 
+
+06:32 I've had I I'm using it right now to
+06:34 
+
+06:34 transcribe this believe it or not do do
+06:36 
+
+06:36 you mind if I show the camera real quick
+06:37 
+
+06:37 yeah yeah you can show it yeah so
+06:40 
+
+06:40 basically this is the app for everybody
+06:42 
+
+06:42 to see it's just transcribing right now
+06:44 
+
+06:44 and I'll pull down for the insights yeah
+06:47 
+
+06:47 so it's like PR pass right like about a
+06:49 
+
+06:49 second I mean it's instant compared to
+06:52 
+
+06:52 what you have to wait for Chach BT
+06:54 
+
+06:54 sometimes like minutes for it advanc
+06:56 
+
+06:56 reasoning and you can click on the
+06:58 
+
+06:58 transcript so you can see whatever it
+06:59 
+
+06:59 has captured so
+07:01 
+
+07:01 far and we had we had to do a lot of
+07:04 
+
+07:04 optimizations to make sure that so we
+07:06 
+
+07:06 don't show you the live transcript
+07:07 
+
+07:07 because that kills your battery so
+07:09 
+
+07:09 battery life is optimized by like not
+07:11 
+
+07:11 running the CPU and GPU continuously we
+07:14 
+
+07:14 collect very low energy audio streams
+07:16 
+
+07:16 and then every second every 30 seconds
+07:18 
+
+07:18 or every minute we suddenly turn on the
+07:21 
+
+07:21 CPU and GPU for a second and you trans
+07:23 
+
+07:23 the whole thing we turn it off so and
+07:25 
+
+07:25 there's a lot of other stuff that we do
+07:27 
+
+07:27 too right so I mean that the
+07:30 
+
+07:30 foundational technology that you're
+07:33 
+
+07:33 implementing here that you've figured
+07:34 
+
+07:34 out this essentially this optimization
+07:36 
+
+07:36 architecture I mean what sort of road
+07:38 
+
+07:38 map what sort of features you guys
+07:39 
+
+07:39 Envision on top of what you've built so
+07:41 
+
+07:41 far yeah so our we have a bunch of
+07:44 
+
+07:44 phases phase one is to give you
+07:45 
+
+07:45 immediate value so let's say you have a
+07:47 
+
+07:47 conversation a meeting or a lecture you
+07:50 
+
+07:50 get instant summary so that's like
+07:51 
+
+07:51 immediate value you don't need much
+07:53 
+
+07:53 memory to give you that instant
+07:55 
+
+07:55 gratification so a lot of people who use
+07:57 
+
+07:57 it as students who go to lectures they
+07:58 
+
+07:58 get summaries they get ask it questions
+08:00 
+
+08:00 instead of asking the professor and
+08:02 
+
+08:02 it'll tell you the same thing the
+08:03 
+
+08:03 professor said right it's more
+08:05 
+
+08:05 personalized than just answering based
+08:07 
+
+08:07 on a textbook and then for example uh if
+08:10 
+
+08:10 you are in a work meeting you can get
+08:12 
+
+08:12 action items you can write followup
+08:14 
+
+08:14 emails all that as part of phase one
+08:17 
+
+08:17 basically a really superpowered AI
+08:19 
+
+08:19 notaker right phase two oh yeah go ahead
+08:22 
+
+08:22 I was just gonna ask this is actually
+08:24 
+
+08:24 asking me to ask you something right now
+08:27 
+
+08:27 it's asking how does the app handle
+08:29 
+
+08:29 complex questions about lecture
+08:30 
+
+08:30 summaries or about what it's here yes so
+08:34 
+
+08:34 the app actually has access to your
+08:35 
+
+08:35 entire transcript and it has all of the
+08:37 
+
+08:37 world's knowledge like a like an llm and
+08:40 
+
+08:40 it can search the web so we have this
+08:42 
+
+08:42 like multi-step reasoning model that
+08:45 
+
+08:45 decides given your question should I go
+08:46 
+
+08:46 read all the transcripts or should I
+08:48 
+
+08:48 search the web or should I like use on
+08:51 
+
+08:51 my use my existing memory that I've been
+08:53 
+
+08:53 trained with right entire internet and
+08:55 
+
+08:55 then just answer it and it can do
+08:56 
+
+08:56 multiple things it can go read the
+08:57 
+
+08:57 transcript then search the web and then
+08:59 
+
+08:59 come up with its own Final Answer based
+09:01 
+
+09:01 on its knowledge so it's like free to
+09:03 
+
+09:03 decide what to do right and it's the
+09:06 
+
+09:06 immediacy of it that's gamechanging
+09:08 
+
+09:08 because you can't do this with chat TBT
+09:09 
+
+09:09 I could put chat TBT on right now for
+09:11 
+
+09:11 voice note it'll just immediately start
+09:13 
+
+09:13 to interrupt me and I'm not even know
+09:14 
+
+09:14 with the with the the thought sometimes
+09:16 
+
+09:16 yeah and then after like about like 30
+09:18 
+
+09:18 minutes or something it'll just like run
+09:20 
+
+09:20 out of its context window and it'll just
+09:22 
+
+09:22 either stop so it's not designed to run
+09:24 
+
+09:24 all day we can run so we are able to run
+09:27 
+
+09:27 the app from 9:00 a.m. to 9:00 P p.m. 12
+09:29 
+
+09:29 hours without killing the battery on the
+09:31 
+
+09:31 latest
+09:32 
+
+09:32 iPhones exactly wow so I now I
+09:36 
+
+09:36 interrupted you by mistake when just to
+09:38 
+
+09:38 ask you the question from the app what
+09:39 
+
+09:39 what was that second step in that road
+09:41 
+
+09:41 map yes so phase two is to like give you
+09:44 
+
+09:44 like even like more long-term benefits
+09:46 
+
+09:46 like once you've listened to somebody
+09:47 
+
+09:47 for a week a month you can ask like
+09:50 
+
+09:50 recap my memorable moments from this
+09:52 
+
+09:52 month or what can I learn give me
+09:55 
+
+09:55 feedback on how how I can improve as a
+09:57 
+
+09:57 CEO based on all the conversations with
+09:59 
+
+09:59 my team and investors this month right I
+10:02 
+
+10:02 can also ask it like what were the
+10:04 
+
+10:04 action items of this month that I missed
+10:07 
+
+10:07 that I failed to do so it's listen to
+10:08 
+
+10:08 all the action items that came up during
+10:10 
+
+10:10 our meetings and it's listening if I'm
+10:12 
+
+10:12 actually completing them right so it can
+10:14 
+
+10:14 also tell you what you missed and it can
+10:16 
+
+10:16 check off things automatically for you
+10:17 
+
+10:17 like a AI to-do list that just knows
+10:20 
+
+10:20 everything you don't have to manually go
+10:21 
+
+10:21 and add things it can also like help you
+10:23 
+
+10:23 like create an investor update based on
+10:26 
+
+10:26 everything that happened last month
+10:28 
+
+10:28 right so it will like actually create an
+10:29 
+
+10:29 investor update I can just send it to
+10:31 
+
+10:31 our investors I actually got twin mind
+10:33 
+
+10:33 to write an investment memo and Pitch
+10:35 
+
+10:35 deck about itself based on all the
+10:37 
+
+10:37 conversations I had with the team and
+10:39 
+
+10:39 the investors wow and the investors
+10:42 
+
+10:42 actually lowed it I just shared it with
+10:43 
+
+10:43 everybody I can send it to you as well
+10:45 
+
+10:45 okay I'll be open to it and it's like
+10:47 
+
+10:47 way better than if I wrote it myself
+10:50 
+
+10:50 because I would have forgotten a lot of
+10:51 
+
+10:51 things I've said and like heard and from
+10:53 
+
+10:53 my feedback from users and teammates and
+10:56 
+
+10:56 testimonials it's just it's like having
+10:58 
+
+10:58 a perfect memory
+10:60 
+
+10:60 our brain forget 90% of things within s
+11:03 
+
+11:03 days wow yeah and that's funny enough I
+11:07 
+
+11:07 actually just finished up a conversation
+11:09 
+
+11:09 with somebody who's trying to solve that
+11:10 
+
+11:10 for just people through training them
+11:13 
+
+11:13 like with different learning methods
+11:15 
+
+11:15 different uh learning strategies using
+11:18 
+
+11:18 now in terms of like uh Integrations
+11:20 
+
+11:20 because it sounds like the app can do an
+11:24 
+
+11:24 intense amount of memorization and
+11:26 
+
+11:26 recall and strategizing based off of the
+11:28 
+
+11:28 based off of its resource say what sort
+11:30 
+
+11:30 of resources is it currently capable of
+11:32 
+
+11:32 ingesting and like is there a vision for
+11:34 
+
+11:34 additional Integrations additional
+11:36 
+
+11:36 memory uploading yes definitely
+11:39 
+
+11:39 eventually we wanted to integrate with
+11:40 
+
+11:40 everything right now we integrate with
+11:42 
+
+11:42 your Google calendar we also have a
+11:45 
+
+11:45 Chrome extension that syncs with your
+11:46 
+
+11:46 app so you can install the Chrome
+11:48 
+
+11:48 extension and it'll have access to like
+11:50 
+
+11:50 any websites you add to it you can
+11:52 
+
+11:52 choose to add any number of tabs like
+11:54 
+
+11:54 your like Gmail your slack your notion
+11:57 
+
+11:57 or right Google doc and it'll grab
+12:00 
+
+12:00 context from that as well and add to
+12:02 
+
+12:02 this memory so you could ask like based
+12:04 
+
+12:04 on what we discussed in this meeting and
+12:05 
+
+12:05 this pitch deck that somebody shared
+12:07 
+
+12:07 with me like write an investment memo
+12:10 
+
+12:10 investors use that right you can also
+12:12 
+
+12:12 like say like what are my most important
+12:13 
+
+12:13 emails today and which one should I
+12:16 
+
+12:16 actually reply to so it has it has
+12:18 
+
+12:18 access to everything you've said before
+12:19 
+
+12:19 so it can prioritize your emails much
+12:21 
+
+12:21 better than any AI app can do because
+12:24 
+
+12:24 other apps don't know what is important
+12:26 
+
+12:26 to you unless you have this long-term
+12:27 
+
+12:27 memory so you could ask you could open a
+12:30 
+
+12:30 News website and tell ask it which news
+12:32 
+
+12:32 articles would be relevant to me and
+12:35 
+
+12:35 then make a list of those right or go
+12:37 
+
+12:37 through your entire Twitter feed and I
+12:39 
+
+12:39 have like hundreds of tweets I don't
+12:41 
+
+12:41 have time to read it right so I can just
+12:43 
+
+12:43 scroll to the bottom and then ask the
+12:44 
+
+12:44 twin M Side bar which are the most
+12:47 
+
+12:47 interesting tweets for me and it knows
+12:49 
+
+12:49 that I'm the CE of a company and these
+12:50 
+
+12:50 are the technologies that I'm interested
+12:52 
+
+12:52 in and and we using already and these
+12:54 
+
+12:54 are the kind of things that I like so it
+12:57 
+
+12:57 will do a much better job than any
+12:58 
+
+12:58 recommendation algor
+13:00 
+
+13:00 them right and it'll do it right there
+13:03 
+
+13:03 alongside whatever you're looking at
+13:05 
+
+13:05 once you add it to the context so the
+13:08 
+
+13:08 question becomes like I was actually
+13:10 
+
+13:10 using the Chrome extension too just
+13:12 
+
+13:12 recently because I wanted to see like
+13:14 
+
+13:14 what's the full s
+13:16 
+
+13:16 um will there will there ever be an
+13:18 
+
+13:18 option where you can just have it just
+13:20 
+
+13:20 give it full access everything doesn't
+13:22 
+
+13:22 have to ask me to add the context it'll
+13:25 
+
+13:25 just take everything in I mean our first
+13:27 
+
+13:27 version did that people didn't want that
+13:29 
+
+13:29 for privacy reasons because it just adds
+13:31 
+
+13:31 all your tabs so then we made it
+13:33 
+
+13:33 manually you add the tabs you're
+13:35 
+
+13:35 interested in so you have full control
+13:36 
+
+13:36 over what goes into the AI model but
+13:38 
+
+13:38 it's easy to add all of it but then also
+13:41 
+
+13:41 the problem is if you add too much
+13:43 
+
+13:43 context the models might get overwhelmed
+13:45 
+
+13:45 as well so as the llms get better and
+13:47 
+
+13:47 better it will be able to handle like
+13:49 
+
+13:49 hundreds of tabs and everything you see
+13:51 
+
+13:51 right now we can handle like 10 i' for
+13:53 
+
+13:53 example aqu quaria did recently to find
+13:55 
+
+13:55 this house so we all moved to this big
+13:57 
+
+13:57 house where we like live in as well and
+14:00 
+
+14:00 like we working remotely from there so
+14:02 
+
+14:02 in order to find this house where I live
+14:04 
+
+14:04 with my co-founders it was really hard
+14:06 
+
+14:06 because we wanted like a cottage in the
+14:08 
+
+14:08 back where I can live with my wife and a
+14:10 
+
+14:10 main house where my co-founders live so
+14:13 
+
+14:13 in Zillow there is no filter for cottage
+14:15 
+
+14:15 so I opened like 20 or I think like 50
+14:18 
+
+14:18 different houses that came up on the
+14:20 
+
+14:20 search list on Zillow and then I asked
+14:22 
+
+14:22 the Chrome extension go read all of
+14:23 
+
+14:23 those and tell me which ones have an Adu
+14:26 
+
+14:26 or a cottage or like something similar
+14:29 
+
+14:29 to that and it did like instantly it
+14:31 
+
+14:31 went through 50 tabs it would have taken
+14:33 
+
+14:33 me hours to like go read all the
+14:35 
+
+14:35 descriptions right so if anything I
+14:38 
+
+14:38 think that's like the one additional
+14:39 
+
+14:39 like Insight just from this conversation
+14:41 
+
+14:41 to for anybody listening if you're
+14:43 
+
+14:43 adopting twin mind use that workflow
+14:46 
+
+14:46 right open up all the open up all the
+14:49 
+
+14:49 tabs I mean not all all the tabs but all
+14:51 
+
+14:51 the relevant tabs add them to this
+14:53 
+
+14:53 physic contacts in that moment and then
+14:55 
+
+14:55 then ask instead of just one one tab at
+14:58 
+
+14:58 a time right
+14:60 
+
+14:60 so it's it's a workflow change too that
+15:03 
+
+15:03 has to be adopted we use it all the time
+15:06 
+
+15:06 for example when we are like reviewing
+15:07 
+
+15:07 machine learning research papers we have
+15:09 
+
+15:09 like 10 of them open and ask to compare
+15:11 
+
+15:11 them and like find like which one we
+15:13 
+
+15:13 should use or like what are the comp
+15:15 
+
+15:15 disadvantages of each model versus other
+15:18 
+
+15:18 one it it does a great job at reading 10
+15:20 
+
+15:20 20 things at once and it's painful to
+15:23 
+
+15:23 have to download them one by one and
+15:24 
+
+15:24 attach it in chat GPT right right and
+15:28 
+
+15:28 even if you're looking up on deep
+15:29 
+
+15:29 research on chaty PT or in perplexity I
+15:32 
+
+15:32 mean those you probably use it I mean
+15:34 
+
+15:34 it's really great sourcing up
+15:36 
+
+15:36 information that you otherwise wouldn't
+15:37 
+
+15:37 have found with a simple Google search
+15:39 
+
+15:39 but at that point you have to open up
+15:40 
+
+15:40 all the tabs and you have to trust the
+15:42 
+
+15:42 thing that it gives you yes and deep
+15:44 
+
+15:44 research is great we love it we use it
+15:46 
+
+15:46 all the time and what we actually have
+15:47 
+
+15:47 is now extension of deep research we
+15:50 
+
+15:50 call it deep memory search so it not
+15:52 
+
+15:52 only does research on the entire web it
+15:54 
+
+15:54 also goes and searches your entire past
+15:57 
+
+15:57 so it knows everything you've ever said
+15:59 
+
+15:59 before so it goes and finds it relevant
+16:01 
+
+16:01 information and then it also searches a
+16:03 
+
+16:03 web and by combining the both it's
+16:05 
+
+16:05 actually doing a much better job than
+16:06 
+
+16:06 just letting deep research go without
+16:08 
+
+16:08 knowing anything about you
+16:10 
+
+16:10 exactly fascinating so then I mean we're
+16:13 
+
+16:13 talking about different use cases
+16:14 
+
+16:14 different ways of going about it I I
+16:16 
+
+16:16 just want to ask like who do you think
+16:19 
+
+16:19 and who has it proven to be best for so
+16:22 
+
+16:22 so far like we have half the users are
+16:24 
+
+16:24 students who use it to like learn faster
+16:27 
+
+16:27 transcribe lecture notes create
+16:28 
+
+16:28 assignments s like create study guides
+16:31 
+
+16:31 flash cards or then other half of these
+16:33 
+
+16:33 like are professionals so like people
+16:35 
+
+16:35 who are like Tech workers knowledge
+16:37 
+
+16:37 workers like people who go to a lot of
+16:39 
+
+16:39 conferences and they use the app in
+16:41 
+
+16:41 their pocket and they're like okay like
+16:43 
+
+16:43 they forgot all the 20 30 people they
+16:45 
+
+16:45 met that day so that at at the end of
+16:46 
+
+16:46 the day like who did who all did I meet
+16:48 
+
+16:48 can you go find all the LinkedIn
+16:49 
+
+16:49 profiles and give me short memorable
+16:51 
+
+16:51 things that each person said so I can
+16:52 
+
+16:52 kind of recall so people people like
+16:55 
+
+16:55 that who go to a lot of events so even
+16:57 
+
+16:57 investors it's like a lot of investors
+16:59 
+
+16:59 use like actively because they're
+17:00 
+
+17:00 meeting like 10 Founders a day they
+17:02 
+
+17:02 don't remember who said what they can go
+17:05 
+
+17:05 home and ask this to write an investment
+17:06 
+
+17:06 memo for each company so it is actually
+17:08 
+
+17:08 super useful for them eventually anybody
+17:10 
+
+17:10 but these are the two initial like
+17:12 
+
+17:12 professionals who have a lot of
+17:13 
+
+17:13 in-person events so you could use things
+17:15 
+
+17:15 like otter and granola and all these
+17:17 
+
+17:17 companies to capture your virtual
+17:20 
+
+17:20 meetings like a zoom call but there's no
+17:23 
+
+17:23 real goto product for like an inperson
+17:25 
+
+17:25 meeting so we really have a lot of
+17:27 
+
+17:27 people using this for inperson meetings
+17:29 
+
+17:29 that are completely lost because
+17:31 
+
+17:31 inperson meetings are actually more
+17:33 
+
+17:33 important than virtual meetings lot of
+17:35 
+
+17:35 the most important things happen in
+17:37 
+
+17:37 person true very very true very true so
+17:42 
+
+17:42 how have you been using it Beyond like
+17:44 
+
+17:44 the tabs for the research for the
+17:45 
+
+17:45 cottage for the the science research
+17:48 
+
+17:48 papers that you need to find insights
+17:49 
+
+17:49 from what other use cases have you found
+17:52 
+
+17:52 so I use it every day I have now six
+17:54 
+
+17:54 months of my life captured I probably
+17:56 
+
+17:56 have the more I probably am like should
+17:58 
+
+17:58 get a Guinness World Record as something
+17:59 
+
+17:59 for the most amount of words captured by
+18:02 
+
+18:02 a person because I run it all day every
+18:04 
+
+18:04 day right and like transcribe it and
+18:06 
+
+18:06 this the first time it's even possible
+18:07 
+
+18:07 to do something like this because these
+18:09 
+
+18:09 transcription models are pretty bad
+18:10 
+
+18:10 maybe people have recorded their lives
+18:12 
+
+18:12 before but this is actually actually
+18:13 
+
+18:13 transcribing and act indexing and asking
+18:16 
+
+18:16 questions right so I use it every day to
+18:19 
+
+18:19 get action items after every call like
+18:20 
+
+18:20 as a CEO like we have all these meetings
+18:22 
+
+18:22 and I need to know what are the tasks
+18:24 
+
+18:24 that need to be done I get the action
+18:25 
+
+18:25 items for every single memory that I
+18:27 
+
+18:27 capture now we're working on this un
+18:29 
+
+18:29 ified action item list so it'll combine
+18:31 
+
+18:31 action items from multiple memories and
+18:33 
+
+18:33 you can like take it off instead of
+18:34 
+
+18:34 using like a j or to-do list app this
+18:37 
+
+18:37 actually captures it automatically and
+18:38 
+
+18:38 picks it up automatically right I
+18:40 
+
+18:40 actually I think I saw that on your site
+18:42 
+
+18:42 the other day where you're putting
+18:43 
+
+18:43 together like a team version of this
+18:45 
+
+18:45 right team version yes so the team
+18:46 
+
+18:46 version will have collaboration features
+18:48 
+
+18:48 so let's say I go to a meeting and I
+18:50 
+
+18:50 have five action items I want to assign
+18:51 
+
+18:51 it to somebody on my team so I just tap
+18:53 
+
+18:53 it and assign it to like say my iOS
+18:56 
+
+18:56 engineer and it shows up on his twn mine
+18:59 
+
+18:59 right
+18:59 
+
+18:59 so this would be actually pretty cool
+19:02 
+
+19:02 because otherwise I have to go in and
+19:03 
+
+19:03 manually type it into jira or too list
+19:06 
+
+19:06 app Asana right it's it's a it is and
+19:10 
+
+19:10 and a lot of these apps end up becoming
+19:11 
+
+19:11 just additional complexities from
+19:13 
+
+19:13 getting to the actual result everybody's
+19:15 
+
+19:15 looking for just getting the thing done
+19:17 
+
+19:17 right yes exactly and then we'll have
+19:18 
+
+19:18 even more like for example you can share
+19:20 
+
+19:20 a meeting with anybody in your team and
+19:23 
+
+19:23 they can share it around so this has
+19:24 
+
+19:24 like this built-in virality because we
+19:26 
+
+19:26 share a memory let's say you meet five
+19:29 
+
+19:29 people people you share it to those five
+19:30 
+
+19:30 people those people then have this
+19:33 
+
+19:33 Banner that says download twin mind
+19:35 
+
+19:35 right at the top and they see this
+19:36 
+
+19:36 beautiful summary below so now they are
+19:38 
+
+19:38 curious they try downloading it and now
+19:40 
+
+19:40 they capture a few meetings with their
+19:42 
+
+19:42 team or their friends and they want to
+19:43 
+
+19:43 send it to them and for example we had a
+19:45 
+
+19:45 student who's been capturing every
+19:46 
+
+19:46 single lecture for the last entire
+19:48 
+
+19:48 semester and he created a study guide
+19:50 
+
+19:50 and shared it with this whole class of
+19:52 
+
+19:52 like 100 people and a lot of them
+19:54 
+
+19:54 started using it nice so I personally
+19:57 
+
+19:57 find the action items us that's because
+19:59 
+
+19:59 I'm a CEO but I also like to find like
+20:02 
+
+20:02 the memorable moments of my month
+20:04 
+
+20:04 because otherwise I would just forget
+20:05 
+
+20:05 this great conversation of this really
+20:07 
+
+20:07 funny thing my wife said like two weeks
+20:09 
+
+20:09 ago or one month ago that's completely
+20:11 
+
+20:11 lost unless this thing helps you recall
+20:13 
+
+20:13 it right and then we laugh about it so
+20:16 
+
+20:16 that's actually a really good use case
+20:18 
+
+20:18 right so it's it's not just about the
+20:21 
+
+20:21 efficiency the productivity on the other
+20:23 
+
+20:23 side of it is actually like it's
+20:25 
+
+20:25 changing the way that you live your life
+20:26 
+
+20:26 it's improving the quality of your life
+20:29 
+
+20:29 yeah
+20:30 
+
+20:30 definitely but because now I cannot
+20:31 
+
+20:31 imagine living without it right because
+20:33 
+
+20:33 I've used it to collect five months of
+20:35 
+
+20:35 my memories the more you use it the more
+20:38 
+
+20:38 you cannot leave right it's like having
+20:40 
+
+20:40 your Google photos like once you've
+20:41 
+
+20:41 collected like two years of photos even
+20:44 
+
+20:44 if they ask me to pay like $10 a month
+20:45 
+
+20:45 I'm going to pay because like I want my
+20:47 
+
+20:47 photos is not easy to move it around and
+20:50 
+
+20:50 it's like actually really nice to like
+20:51 
+
+20:51 have those highlights of your memories
+20:54 
+
+20:54 come back in photos you're trying to do
+20:56 
+
+20:56 the same thing with like audio memories
+20:58 
+
+20:58 right right right and now you're you're
+21:02 
+
+21:02 really focusing on audio now I'm
+21:04 
+
+21:04 wondering the future Integrations that
+21:05 
+
+21:05 you're planning is that also going to be
+21:07 
+
+21:07 maybe like apple photos Google photos on
+21:09 
+
+21:09 your actual device and is it going to
+21:11 
+
+21:11 start like connecting them turning into
+21:13 
+
+21:13 like do personalized graphs of sort yes
+21:15 
+
+21:15 so the next feature we already almost
+21:18 
+
+21:18 done with that is to like let you
+21:19 
+
+21:19 connect photos so you can add memory
+21:22 
+
+21:22 doesn't have to be just audio it could
+21:23 
+
+21:23 be a file it could be your own notes you
+21:25 
+
+21:25 could write your own notes during a
+21:27 
+
+21:27 meeting like that is not said or you
+21:29 
+
+21:29 could take photo of like a whiteboard or
+21:31 
+
+21:31 a a PowerPoint presentation if you're at
+21:33 
+
+21:33 a conference you could take photos and
+21:35 
+
+21:35 then link all of that and or you could
+21:38 
+
+21:38 take photos of funny things that are
+21:39 
+
+21:39 happening and the conversation around it
+21:41 
+
+21:41 it could be photos videos and we connect
+21:43 
+
+21:43 with apple photos so yeah so you could
+21:46 
+
+21:46 just pair everything together and then
+21:47 
+
+21:47 have a nice timeline of your life right
+21:50 
+
+21:50 right and I can imagine it also
+21:51 
+
+21:51 connecting potentially with like apple
+21:53 
+
+21:53 reminders or any sort of other like task
+21:55 
+
+21:55 like very simple task T apps that has
+21:58 
+
+21:58 like in like already built in API
+22:01 
+
+22:01 Integrations with with the devices to
+22:03 
+
+22:03 use different yes so we are also going
+22:06 
+
+22:06 to add Integrations initially with a
+22:08 
+
+22:08 Google ecosystem like Google Docs and
+22:10 
+
+22:10 all that and then eventually more things
+22:12 
+
+22:12 actually with a Chrome extension you can
+22:13 
+
+22:13 actually not only pull context from
+22:15 
+
+22:15 anything you can actually insert text
+22:17 
+
+22:17 directly in so you be looking at a
+22:19 
+
+22:19 notion page and you just add a
+22:21 
+
+22:21 conversation you could say like update
+22:22 
+
+22:22 this page based on our recent call and
+22:25 
+
+22:25 it would actually write down the updat
+22:26 
+
+22:26 and you could click insert and it would
+22:28 
+
+22:28 just go fill it in
+22:29 
+
+22:29 so that's the cool thing about the
+22:30 
+
+22:30 Chrome extension and it can fill in
+22:32 
+
+22:32 emails you could have a call with
+22:33 
+
+22:33 someone you could click reply and then
+22:35 
+
+22:35 you could say like write the followup
+22:37 
+
+22:37 email based on the thread and the
+22:38 
+
+22:38 conversation I just had and it would do
+22:41 
+
+22:41 that and it like insert it directly into
+22:42 
+
+22:42 Gmail so we already do integrate with
+22:45 
+
+22:45 anything any website tab you can open
+22:48 
+
+22:48 right right it's just it's just getting
+22:51 
+
+22:51 people like everyday people who aren't
+22:54 
+
+22:54 power users on Chrome right to adopt and
+22:57 
+
+22:57 really use it now I guess on on a more
+22:60 
+
+22:60 technical technical note is there a plan
+23:02 
+
+23:02 to release like an API for integrating
+23:05 
+
+23:05 with platform yes I think so eventually
+23:08 
+
+23:08 we would want to create something like a
+23:10 
+
+23:10 memory API so you can you own your
+23:13 
+
+23:13 memories your memories stay on like you
+23:16 
+
+23:16 on your own device or on your own
+23:17 
+
+23:17 private cloud and then we if let's say
+23:20 
+
+23:20 you want to use chat GPT or you want to
+23:22 
+
+23:22 open Netflix and you want your own
+23:24 
+
+23:24 personalized Netflix feed right now
+23:27 
+
+23:27 Netflix recommendation is terrible like
+23:28 
+
+23:28 my five and I spend like 10 minutes to
+23:30 
+
+23:30 find something we want to watch together
+23:32 
+
+23:32 M right because it doesn't know anything
+23:34 
+
+23:34 about you other than what you watched
+23:36 
+
+23:36 but if you open up this memory layer and
+23:38 
+
+23:38 say Netflix want to pull from your
+23:40 
+
+23:40 memory layer to querry like information
+23:42 
+
+23:42 about what you like and so your SEC your
+23:45 
+
+23:45 twin mind is like a second brain that is
+23:47 
+
+23:47 like your clone right it already knows
+23:49 
+
+23:49 what you like because it's kind of like
+23:51 
+
+23:51 having your brain go through all of
+23:53 
+
+23:53 Netflix and figure out what you like why
+23:55 
+
+23:55 not just send your second brain to go
+23:56 
+
+23:56 through Netflix and figure out what you
+23:58 
+
+23:58 like
+23:59 
+
+23:59 right if you open up that API everyone
+24:02 
+
+24:02 Benefits YouTube recommendations would
+24:03 
+
+24:03 get better Netflix would get better you
+24:05 
+
+24:05 open up Google app and you see all this
+24:07 
+
+24:07 news feed on the Google's app which I do
+24:10 
+
+24:10 every day but it's not really that good
+24:13 
+
+24:13 so we could open up that API to any
+24:16 
+
+24:16 provider right believe it or not from a
+24:19 
+
+24:19 personal note years ago 10 years ago
+24:22 
+
+24:22 when I Was An Architect school I
+24:23 
+
+24:23 actually imagined that this would
+24:24 
+
+24:24 eventually happen some sort of
+24:26 
+
+24:26 personalization layer for the internet
+24:28 
+
+24:28 because eventually we're going from a
+24:30 
+
+24:30 for this world to post Forest world
+24:32 
+
+24:32 right everything's manufact Mass
+24:34 
+
+24:34 manufactured now everything's turning
+24:35 
+
+24:35 into Mass personalized you already see
+24:37 
+
+24:37 it on the feed Tik Tok Instagram
+24:39 
+
+24:39 everywhere else so then how do you
+24:41 
+
+24:41 integrate people and protect people's
+24:44 
+
+24:44 personal memories when on the internet
+24:47 
+
+24:47 right and I wonder like could you even
+24:49 
+
+24:49 Beyond personalization of feeds both
+24:52 
+
+24:52 Instagram Tik Tok and Netflix and the
+24:54 
+
+24:54 rest turn it into like a personalized
+24:58 
+
+24:58 life coach or personalized like Guide to
+25:00 
+
+25:00 Life cuz you're already trying to
+25:02 
+
+25:02 improve it right you're trying to help
+25:04 
+
+25:04 people take action remember remember you
+25:07 
+
+25:07 know valuable memories well what's what
+25:10 
+
+25:10 what becomes possible thereafter once
+25:11 
+
+25:11 you actually open up an API like that it
+25:13 
+
+25:13 seems like I mean the possibilities are
+25:16 
+
+25:16 endless right eventually we don't even
+25:18 
+
+25:18 know how AI is getting better and better
+25:20 
+
+25:20 right we don't know how much if you
+25:23 
+
+25:23 start capturing things today how much
+25:25 
+
+25:25 value you're going to get in a year when
+25:27 
+
+25:27 AI gets even better and then in two
+25:28 
+
+25:28 years so if you're not capturing your
+25:30 
+
+25:30 life today you might have a disadvantage
+25:32 
+
+25:32 over everybody else right when AI is so
+25:34 
+
+25:34 good that if you could just feed it two
+25:36 
+
+25:36 years of data it becomes just like you
+25:38 
+
+25:38 it can do anything you would do in the
+25:40 
+
+25:40 same way make decisions in the same way
+25:42 
+
+25:42 write things in the same way because it
+25:43 
+
+25:43 learns your values your style everything
+25:47 
+
+25:47 then that memory layer that you have you
+25:49 
+
+25:49 control it right you decide who to
+25:50 
+
+25:50 provide it to and they don't get access
+25:53 
+
+25:53 to your all your memories they can just
+25:54 
+
+25:54 ask would this person like this movie or
+25:56 
+
+25:56 not would this person like this thing
+25:58 
+
+25:58 not right right so what ends up
+26:01 
+
+26:01 happening sounds like is okay you both
+26:03 
+
+26:03 have twin Minds you both have your
+26:04 
+
+26:04 memory apis a platform can better can
+26:07 
+
+26:07 integrate both of those apis both of
+26:09 
+
+26:09 your memories and start to customize a
+26:12 
+
+26:12 better way for you two to spend time
+26:14 
+
+26:14 together so then what does that mean for
+26:16 
+
+26:16 human connection it means everybody
+26:18 
+
+26:18 start getting along more in some
+26:20 
+
+26:20 capacity right yeah I mean it because
+26:23 
+
+26:23 how much time do you spend like trying
+26:25 
+
+26:25 to like decide what to do like pick a
+26:27 
+
+26:27 restaurant uh like figure out who to
+26:30 
+
+26:30 email who to like actually I don't even
+26:32 
+
+26:32 in dating apps like you are spending
+26:34 
+
+26:34 time when an AI should have already
+26:37 
+
+26:37 filtered things for you and make your
+26:39 
+
+26:39 life better like find the perfect person
+26:41 
+
+26:41 find the perfect person that you would
+26:43 
+
+26:43 be friends with find the perfect
+26:44 
+
+26:44 restaurant that you would like the
+26:46 
+
+26:46 perfect Hotel you would like to stay in
+26:48 
+
+26:48 the perfect clip planning you are
+26:50 
+
+26:50 spending a lot of time doing these
+26:52 
+
+26:52 things manually each time the AI do it
+26:54 
+
+26:54 so that you just spend time with the
+26:56 
+
+26:56 people you love and go on the perfect
+26:58 
+
+26:58 optimize for you exactly and I think the
+27:03 
+
+27:03 a larger larger Point here is like we
+27:05 
+
+27:05 really only live one life right we only
+27:07 
+
+27:07 have so much time yes then AI with
+27:12 
+
+27:12 something like this helps us make it so
+27:14 
+
+27:14 then that life is as great as we can
+27:16 
+
+27:16 possibly make it exactly and the
+27:19 
+
+27:19 interesting thing is that like Tik Tok
+27:21 
+
+27:21 YouTube Netflix all these platforms
+27:23 
+
+27:23 their interests are not aligned with
+27:25 
+
+27:25 yours they want you to stay on that
+27:26 
+
+27:26 platform as long as possible even if it
+27:29 
+
+27:29 means like keep making you watch all
+27:30 
+
+27:30 this clickbait things that does not
+27:32 
+
+27:32 actually make you happier or doesn't
+27:35 
+
+27:35 make you like learn anything it's just
+27:37 
+
+27:37 trying to keep you doom scrolling on
+27:39 
+
+27:39 this platform as long as as they can
+27:41 
+
+27:41 butas if you had your own personal AI
+27:43 
+
+27:43 that defends your interest right it
+27:46 
+
+27:46 knows what values you have so then it
+27:48 
+
+27:48 just need to filter out just the most
+27:50 
+
+27:50 important Tik Tok videos that you need
+27:52 
+
+27:52 to see the most important emails the
+27:54 
+
+27:54 most important shows on you or videos on
+27:56 
+
+27:56 YouTube that's it are the most important
+27:58 
+
+27:58 tweets of the day
+27:59 
+
+27:59 not keep you there any longer than you
+28:01 
+
+28:01 need to maximize life and minimize
+28:03 
+
+28:03 distractions so here's a maybe to play
+28:05 
+
+28:05 Devil's Advocate just for a moment okay
+28:08 
+
+28:08 then what happens when you do live in a
+28:10 
+
+28:10 world where the AI is constantly
+28:12 
+
+28:12 learning you of course and trying to
+28:14 
+
+28:14 adapt everything and customize
+28:16 
+
+28:16 personalize everything to you what then
+28:18 
+
+28:18 Becomes Of Your perception of reality is
+28:21 
+
+28:21 it then just what the AI creates for
+28:25 
+
+28:25 you so I I think of it like if you let
+28:28 
+
+28:28 opening determine what's the best AI
+28:30 
+
+28:30 right or Google or whatever now you have
+28:33 
+
+28:33 one AI that is like everybody's using
+28:36 
+
+28:36 that one Ai and everybody's learning
+28:37 
+
+28:37 from that one Ai and whatever values
+28:39 
+
+28:39 that that AI has is going to be the
+28:42 
+
+28:42 propaganda that everybody else receives
+28:45 
+
+28:45 right whereas with us we are letting
+28:47 
+
+28:47 people create AIS that are already like
+28:51 
+
+28:51 learning from their own values like
+28:53 
+
+28:53 their Traditions their values if you're
+28:54 
+
+28:54 a person in India that grew up in a
+28:57 
+
+28:57 traditional way versus somebody who like
+28:59 
+
+28:59 grew up in Japan or us or like we all
+29:02 
+
+29:02 have different values and different
+29:03 
+
+29:03 cultures you want the AI to be
+29:05 
+
+29:05 democratized so that each individual's
+29:08 
+
+29:08 AI reflects the values and culture that
+29:10 
+
+29:10 they were born in they they learned from
+29:12 
+
+29:12 their parents and so on not have one
+29:14 
+
+29:14 universal AI called Chad GPT or Gemini
+29:17 
+
+29:17 that dictates everybody's values right
+29:19 
+
+29:19 that tells you what is the right thing
+29:20 
+
+29:20 to do and so on right so in many ways we
+29:24 
+
+29:24 can actually argue that right now we're
+29:26 
+
+29:26 already living in a world where our
+29:27 
+
+29:27 lives and our perceptions are customized
+29:29 
+
+29:29 and fine-tuned by an algorithm that we
+29:31 
+
+29:31 don't control everything's already
+29:32 
+
+29:32 getting personalized you can already see
+29:34 
+
+29:34 it in the news and how people feel like
+29:36 
+
+29:36 the rising tensions in the world maybe
+29:38 
+
+29:38 maybe by having your own twin mind that
+29:41 
+
+29:41 creates the demog we want to give each
+29:44 
+
+29:44 person their own AI they can train in
+29:46 
+
+29:46 any way they want like they train their
+29:48 
+
+29:48 child um right or like their family or
+29:52 
+
+29:52 whatever we don't want open any one
+29:54 
+
+29:54 company to tell you what the right
+29:55 
+
+29:55 things are so this is the only way to do
+29:58 
+
+29:58 that you give the control of the
+29:60 
+
+29:60 learning to the user to each user so
+30:03 
+
+30:03 that uh we don't want like uh you know
+30:06 
+
+30:06 1984 like big brother AI exactly so then
+30:11 
+
+30:11 last topic cuz we're nearly at time it
+30:13 
+
+30:13 just flies doesn't
+30:16 
+
+30:16 it one last question if people wanted to
+30:18 
+
+30:18 start with twin mind how would they go
+30:21 
+
+30:21 about it so we can they can go to twinm
+30:24 
+
+30:24 mind.com if you're an iPhone user you
+30:27 
+
+30:27 can download it on the App Store anybody
+30:29 
+
+30:29 can download it on the Chrome web store
+30:31 
+
+30:31 it works on any device Windows Mac and
+30:33 
+
+30:33 just install it on the Chrome the Chrome
+30:35 
+
+30:35 web store will show up on your Chrome
+30:37 
+
+30:37 browser and it's pretty easy to use
+30:39 
+
+30:39 we're working on having a more improved
+30:42 
+
+30:42 onboarding experience but I think it
+30:44 
+
+30:44 should be possible to figure it out yeah
+30:46 
+
+30:46 I mean we would love the feedback we
+30:47 
+
+30:47 just launched this week so we would love
+30:49 
+
+30:49 any feedback to keep improving the
+30:51 
+
+30:51 product we want to make the best product
+30:52 
+
+30:52 for everybody and join us on this
+30:54 
+
+30:54 journey to like create the best TN mind
+30:57 
+
+30:57 for every human on a oh you heard them
+30:60 
+
+30:60 that's where you start you can find them
+31:01 
+
+31:01 on the App Store Chrome extension store
+31:04 
+
+31:04 I'll link all those below so then you
+31:06 
+
+31:06 can see it for
+31:08 
+
+31:08 yourself uh if you haven't tried it yet
+31:10 
+
+31:10 really really consider it this is could
+31:12 
+
+31:12 potentially be
+31:13 
+
+31:13 groundbreaking all right well Daniel
+31:16 
+
+31:16 thank you for taking the time truly it's
+31:17 
+
+31:17 been an honor and a privilege um and
+31:20 
+
+31:20 wishing you the best of luck thank you
+31:22 
+
+31:22 thank you it was great to be on the
+31:24 
+
+31:24 podcast
