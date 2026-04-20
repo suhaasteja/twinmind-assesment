@@ -4,7 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { RefreshCw, Loader2 } from "lucide-react";
 import { useSession, useSettings } from "@/lib/store";
 import { formatTime, uid } from "@/lib/utils";
-import { buildWindow, endsWithQuestion, jaccard } from "@/lib/signals";
+import {
+  buildWindow,
+  containsDecisionPhrase,
+  containsNamedClaim,
+  endsWithQuestion,
+  jaccard,
+} from "@/lib/signals";
+import { buildSuggestionsPrompt, DEFAULT_SUMMARY_PROMPT } from "@/lib/prompts";
 import { Suggestion } from "@/lib/types";
 import { InfoCard, Panel, PanelHeader, TypeChip } from "./ui";
 
@@ -136,8 +143,13 @@ export function SuggestionsColumn({
         body: JSON.stringify({
           transcript: win.text,
           previousTitles,
-          prompt: settings.suggestionsPrompt,
+          prompt: buildSuggestionsPrompt(
+            settings.suggestionsPrompt,
+            settings.meetingKind
+          ),
           model: settings.llmModel,
+          meetingSummary:
+            useSession.getState().meetingSummary || undefined,
         }),
       });
       const data = (await res.json()) as {
@@ -185,10 +197,11 @@ export function SuggestionsColumn({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, autoRefreshPaused, settings.autoRefreshSeconds, chunks.length]);
 
-  // B1: question-interrupt trigger. When a new chunk lands that ends in a
-  // question (`?` or interrogative opener), fire an early refresh,
-  // subject to the in-refresh() cooldown gate. We key off the latest
-  // chunk's id so we never re-trigger for the same chunk on re-renders.
+  // B1/B2/B4: jump-in triggers. When a new chunk lands that contains a
+  // question, a decision phrase, or a named/numeric claim worth verifying,
+  // fire an early refresh — subject to the in-refresh() cooldown gate. We
+  // key off the latest chunk's id so we never re-trigger for the same
+  // chunk on re-renders.
   useEffect(() => {
     if (!active) return;
     if (autoRefreshPaused) return;
@@ -196,10 +209,77 @@ export function SuggestionsColumn({
     const latest = chunks[chunks.length - 1];
     if (latest.id === lastInterruptChunkIdRef.current) return;
     lastInterruptChunkIdRef.current = latest.id;
-    if (!endsWithQuestion(latest.text)) return;
+    const shouldInterrupt =
+      endsWithQuestion(latest.text) ||
+      containsDecisionPhrase(latest.text) ||
+      containsNamedClaim(latest.text);
+    if (!shouldInterrupt) return;
     void refresh("interrupt");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chunks.length, active, autoRefreshPaused]);
+
+  // B5: rolling meeting summary. Every SUMMARIZE_EVERY_CHUNKS new chunks we
+  // re-summarize the full transcript in a background /api/chat call. The
+  // result is threaded into subsequent /api/suggest requests as
+  // `meetingSummary`, giving the suggestions model long-term memory even
+  // though the live window stays small for freshness.
+  useEffect(() => {
+    if (!active) return;
+    if (!settings.apiKey) return;
+    const s = useSession.getState();
+    if (s.summarizing) return;
+    const SUMMARIZE_EVERY_CHUNKS = 6; // ≈ 3 min at 30s/chunk
+    const delta = chunks.length - s.lastSummarizedChunkCount;
+    if (delta < SUMMARIZE_EVERY_CHUNKS) return;
+    if (chunks.length === 0) return;
+
+    const snapshotLen = chunks.length;
+    const priorSummary = s.meetingSummary;
+    const fullTranscript = chunks.map((c) => c.text).join("\n");
+
+    useSession.getState().setSummarizing(true);
+    void (async () => {
+      try {
+        const userMessage = priorSummary
+          ? `Prior rolling summary:\n${priorSummary}\n\nUpdate it using the full transcript below; produce a single replacement summary, not a diff.`
+          : `Produce the first rolling summary of this meeting from the full transcript below.`;
+
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-groq-key": settings.apiKey,
+          },
+          body: JSON.stringify({
+            systemPrompt: DEFAULT_SUMMARY_PROMPT,
+            transcript: fullTranscript,
+            history: [],
+            userMessage,
+            model: settings.llmModel,
+          }),
+        });
+        if (!res.ok || !res.body) return;
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let out = "";
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          out += decoder.decode(value, { stream: true });
+        }
+        const cleaned = out.trim();
+        if (cleaned) {
+          useSession.getState().setMeetingSummary(cleaned, snapshotLen);
+        }
+      } catch {
+        // Non-fatal: we'll try again on the next threshold. Keep the prior
+        // summary intact so suggestions still benefit from older context.
+      } finally {
+        useSession.getState().setSummarizing(false);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chunks.length, active, settings.apiKey]);
 
   // Reset countdown when a source becomes active.
   useEffect(() => {

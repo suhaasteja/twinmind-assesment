@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { jaccard, endsWithQuestion, buildWindow } from "./signals";
+import {
+  buildWindow,
+  containsDecisionPhrase,
+  containsNamedClaim,
+  endsWithQuestion,
+  jaccard,
+} from "./signals";
 import { TranscriptChunk } from "./types";
 
 describe("jaccard", () => {
@@ -60,6 +66,71 @@ describe("endsWithQuestion", () => {
     expect(endsWithQuestion("What did we do? We shipped it.")).toBe(false);
     // Last sentence is a question — should be true.
     expect(endsWithQuestion("We shipped it. What do we do next")).toBe(true);
+  });
+});
+
+describe("containsDecisionPhrase", () => {
+  it("matches common decision/commitment phrases", () => {
+    expect(containsDecisionPhrase("ok let's go with Postgres then")).toBe(true);
+    expect(containsDecisionPhrase("we'll ship it Friday")).toBe(true);
+    expect(containsDecisionPhrase("we decided on option B")).toBe(true);
+    expect(containsDecisionPhrase("final call: go with the proposal")).toBe(true);
+    expect(containsDecisionPhrase("we're going with the smaller team")).toBe(true);
+  });
+
+  it("does not match neutral declaratives", () => {
+    expect(containsDecisionPhrase("we talked about pricing")).toBe(false);
+    expect(containsDecisionPhrase("the meeting started")).toBe(false);
+    expect(containsDecisionPhrase("")).toBe(false);
+  });
+
+  it("is case-insensitive", () => {
+    expect(containsDecisionPhrase("LET'S GO WITH Snowflake")).toBe(true);
+  });
+});
+
+describe("containsNamedClaim", () => {
+  it("matches dollar amounts with magnitudes", () => {
+    expect(containsNamedClaim("revenue doubled to $12M last quarter")).toBe(true);
+    expect(containsNamedClaim("$1.2b valuation")).toBe(true);
+  });
+
+  it("matches percentages and x-multiples", () => {
+    expect(containsNamedClaim("churn dropped 23%")).toBe(true);
+    expect(containsNamedClaim("2.5x faster than before")).toBe(true);
+  });
+
+  it("matches number + unit claims", () => {
+    expect(containsNamedClaim("500k users signed up")).toBe(true);
+    expect(containsNamedClaim("took 3 years to ship")).toBe(true);
+  });
+
+  it("matches a 4-digit year", () => {
+    expect(containsNamedClaim("this started back in 2019")).toBe(true);
+    expect(containsNamedClaim("back in 2024 we pivoted")).toBe(true);
+  });
+
+  it("matches a multi-word proper noun", () => {
+    expect(containsNamedClaim("we'll migrate to New York next month")).toBe(true);
+    expect(containsNamedClaim("ran the benchmarks on Meta Platforms")).toBe(true);
+  });
+
+  it("matches an all-caps acronym", () => {
+    expect(containsNamedClaim("let's move it to AWS")).toBe(true);
+    expect(containsNamedClaim("they use GPU clusters")).toBe(true);
+  });
+
+  it("does not match plain prose without claims", () => {
+    expect(containsNamedClaim("we talked about the roadmap")).toBe(false);
+    expect(containsNamedClaim("keep going, sounds good")).toBe(false);
+    expect(containsNamedClaim("")).toBe(false);
+  });
+
+  it("does not match a bare capitalized sentence start", () => {
+    // "Hello world" is two Capitalized tokens which the proper-noun regex
+    // would match — document that this is an accepted false positive so
+    // future tweaks are intentional.
+    expect(containsNamedClaim("Hello World")).toBe(true);
   });
 });
 

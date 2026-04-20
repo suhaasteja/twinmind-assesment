@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { X, RotateCcw } from "lucide-react";
 import { useSettings } from "@/lib/store";
-import { Settings } from "@/lib/types";
+import { MEETING_KIND_LABELS } from "@/lib/prompts";
+import { MeetingKind, Settings } from "@/lib/types";
 import { Button } from "./ui";
 
 export function SettingsDialog({
@@ -61,6 +62,28 @@ export function SettingsDialog({
               placeholder="gsk_..."
               className={inputCls}
             />
+          </Field>
+
+          <Field
+            label="Meeting kind"
+            hint="Tunes the suggestion type mix and tone to the situation. Takes effect on the next refresh."
+          >
+            <select
+              value={draft.meetingKind}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  meetingKind: e.target.value as MeetingKind,
+                })
+              }
+              className={inputCls}
+            >
+              {(Object.keys(MEETING_KIND_LABELS) as MeetingKind[]).map((k) => (
+                <option key={k} value={k}>
+                  {MEETING_KIND_LABELS[k]}
+                </option>
+              ))}
+            </select>
           </Field>
 
           <div className="grid grid-cols-2 gap-4">

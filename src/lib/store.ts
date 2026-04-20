@@ -27,6 +27,7 @@ const DEFAULT_SETTINGS: Settings = {
   llmModel: "openai/gpt-oss-120b",
   mockSpeed: 1,
   mockScenarioId: "infra",
+  meetingKind: "general",
 
   // Adaptive cadence defaults — tuned in ADAPTIVE_CADENCE.md §5.
   minRefreshIntervalMs: 10_000,
@@ -87,6 +88,14 @@ interface SessionState {
   transcribeErrorStreak: number;
   autoRefreshPaused: boolean;
 
+  // --- Rolling meeting summary (B5) --------------------------------------
+  // Long-term memory of the session. `meetingSummary` is persisted because
+  // it's history-bearing; `lastSummarizedChunkCount` and `summarizing` are
+  // transient runtime flags.
+  meetingSummary: string;
+  lastSummarizedChunkCount: number;
+  summarizing: boolean;
+
   setRecording: (v: boolean) => void;
   setMockActive: (v: boolean) => void;
   addChunk: (c: TranscriptChunk) => void;
@@ -101,6 +110,9 @@ interface SessionState {
   recordTranscribeResult: (ok: boolean) => void;
   resetTranscribeErrors: () => void;
   setAutoRefreshPaused: (v: boolean) => void;
+
+  setMeetingSummary: (s: string, atChunkCount: number) => void;
+  setSummarizing: (v: boolean) => void;
 
   clear: () => void;
 }
@@ -119,6 +131,9 @@ export const useSession = create<SessionState>()(
   inflightTranscribes: 0,
   transcribeErrorStreak: 0,
   autoRefreshPaused: false,
+  meetingSummary: "",
+  lastSummarizedChunkCount: 0,
+  summarizing: false,
   setRecording: (v) => set({ recording: v }),
   setMockActive: (v) => set({ mockActive: v }),
   addChunk: (c) => set((s) => ({ chunks: [...s.chunks, c] })),
@@ -150,6 +165,9 @@ export const useSession = create<SessionState>()(
   resetTranscribeErrors: () =>
     set({ transcribeErrorStreak: 0, autoRefreshPaused: false }),
   setAutoRefreshPaused: (v) => set({ autoRefreshPaused: v }),
+  setMeetingSummary: (s, atChunkCount) =>
+    set({ meetingSummary: s, lastSummarizedChunkCount: atChunkCount }),
+  setSummarizing: (v) => set({ summarizing: v }),
   clear: () =>
     set({
       sessionStartedAt: Date.now(),
@@ -161,6 +179,9 @@ export const useSession = create<SessionState>()(
       inflightTranscribes: 0,
       transcribeErrorStreak: 0,
       autoRefreshPaused: false,
+      meetingSummary: "",
+      lastSummarizedChunkCount: 0,
+      summarizing: false,
     }),
     }),
     {
@@ -174,6 +195,7 @@ export const useSession = create<SessionState>()(
         chunks: state.chunks,
         batches: state.batches,
         chat: state.chat,
+        meetingSummary: state.meetingSummary,
       }),
     }
   )

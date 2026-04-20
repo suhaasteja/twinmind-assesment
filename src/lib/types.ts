@@ -5,6 +5,14 @@ export type SuggestionType =
   | "fact_check"
   | "clarify";
 
+export type MeetingKind =
+  | "general"
+  | "lecture"
+  | "one_on_one"
+  | "pitch"
+  | "standup"
+  | "interview";
+
 export interface Suggestion {
   id: string;
   type: SuggestionType;
@@ -47,6 +55,11 @@ export interface Settings {
   llmModel: string;
   mockSpeed: number; // 1 = realtime, 2/5/10 = faster playback
   mockScenarioId: string;
+
+  // Meeting kind — appends a kind-specific hint to the suggestions prompt so
+  // the model tunes its type mix and tone to the situation (lecture vs. pitch
+  // vs. 1:1 etc.). "general" = no hint appended.
+  meetingKind: MeetingKind;
 
   // --- Adaptive cadence (see ADAPTIVE_CADENCE.md) -------------------------
   minRefreshIntervalMs: number;         // cooldown between any two /api/suggest calls (auto/interrupt)
