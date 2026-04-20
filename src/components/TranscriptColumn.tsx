@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Mic, Square, Play } from "lucide-react";
+import { Mic, Square, Play, Trash2 } from "lucide-react";
 import { useSession, useSettings } from "@/lib/store";
 import { startChunkRecorder, ChunkRecorderHandle } from "@/lib/audio";
 import { startMockPlayback, MockPlayerHandle } from "@/lib/mockPlayer";
@@ -22,6 +22,7 @@ export function TranscriptColumn() {
   const decInflight = useSession((s) => s.decInflight);
   const recordTranscribeResult = useSession((s) => s.recordTranscribeResult);
   const resetTranscribeErrors = useSession((s) => s.resetTranscribeErrors);
+  const clearSession = useSession((s) => s.clear);
 
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(0);
@@ -215,6 +216,28 @@ export function TranscriptColumn() {
             </option>
           ))}
         </select>
+
+        <button
+          onClick={() => {
+            if (chunks.length === 0) return;
+            const ok = window.confirm(
+              "Clear the transcript, suggestions, chat, and rolling summary? This cannot be undone."
+            );
+            if (!ok) return;
+            if (recording) void micHandleRef.current?.stop();
+            if (mockActive) mockHandleRef.current?.stop();
+            clearSession();
+            setError(null);
+          }}
+          disabled={chunks.length === 0}
+          aria-label="Clear session"
+          title="Clear transcript, suggestions, chat, and summary"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+          style={{ background: "var(--panel-2)", borderColor: "var(--border)", color: "var(--fg)" }}
+        >
+          <Trash2 size={12} />
+          Clear
+        </button>
       </div>
 
       <div className="px-4 pt-2 text-[13px] text-[var(--muted)]">
