@@ -413,6 +413,71 @@ describe("B1 question-interrupt trigger", () => {
   });
 });
 
+// ---------- concurrent-entry race ------------------------------------------
+
+describe("concurrent-entry race (duplicate-batch regression)", () => {
+  it("auto-tick and interrupt on the same tick only issue one /api/suggest", async () => {
+    // Reproduces the session bug where an auto refresh and a B1/B2/B4
+    // interrupt fired ~500ms apart for the same transcript state and both
+    // cleared every gate, producing two near-identical suggestion batches.
+    primeSettings();
+
+    // Slow fetch so both racers enter refresh() before either resolves.
+    const resolvers: Array<(value: Response) => void> = [];
+    const fetchMock = vi.fn(
+      () =>
+        new Promise<Response>((r) => {
+          resolvers.push(r);
+        })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<SuggestionsColumn onSuggestionClick={() => {}} />);
+
+    // Seed with a chunk containing a proper-noun claim so the interrupt
+    // effect fires at the same time the auto-tick will.
+    act(() => {
+      useSession.setState((s) => ({
+        chunks: [
+          ...s.chunks,
+          mkChunk({
+            id: "c1",
+            text:
+              seedWindowText() +
+              " we talked about the Grok API and how OpenAI compares",
+          }),
+        ],
+      }));
+    });
+
+    // Trip the auto-tick. The countdown fires refresh("auto"), and the
+    // interrupt effect should *also* try to fire refresh("interrupt")
+    // because the seeded chunk matches containsNamedClaim.
+    await tick(31_000);
+
+    // With the inflight-ref guard + entry-time cooldown stamp, only one
+    // /api/suggest request should have been issued.
+    expect(suggestCalls(fetchMock)).toBe(1);
+
+    // Resolve all in-flight requests so the component settles cleanly.
+    for (const r of resolvers) {
+      r(
+        new Response(
+          JSON.stringify({
+            suggestions: [
+              { id: "s-1", type: "talking_point", title: "t1", preview: "p1" },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      );
+    }
+    await tick(10);
+
+    expect(useSession.getState().batches.length).toBe(1);
+  });
+});
+
 // ---------- guard interactions ---------------------------------------------
 
 describe("guards", () => {

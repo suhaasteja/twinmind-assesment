@@ -46,18 +46,33 @@ export function SuggestionsColumn({
   const lastRefreshAtRef = useRef(0);
   const lastSentWindowRef = useRef("");
   const lastInterruptChunkIdRef = useRef<string | null>(null);
+  // Synchronous in-flight guard. Set at function entry before any await so
+  // two triggers firing in the same tick (e.g. auto-tick + B1/B2/B4
+  // interrupt on the same chunk-add) can't both clear the gates and issue
+  // duplicate /api/suggest calls. `loadingSuggestions` in the store is not
+  // sufficient because it isn't set until after the defer sleep below.
+  const inflightRef = useRef(false);
   // Mirror of countdown so the interval reads the current value without
   // bundling side-effects into a setState updater (which can mis-fire under
   // React strict/concurrent batching).
   const countdownRef = useRef(settings.autoRefreshSeconds);
 
   const refresh = async (trigger: RefreshTrigger = "auto") => {
+    if (inflightRef.current) return;
     if (loading) return;
     if (!settings.apiKey) {
       setError("Paste your Groq API key in Settings first.");
       return;
     }
+    inflightRef.current = true;
+    try {
+      await refreshImpl(trigger);
+    } finally {
+      inflightRef.current = false;
+    }
+  };
 
+  const refreshImpl = async (trigger: RefreshTrigger) => {
     const isManual = trigger === "manual";
 
     // --- D2: transcribe circuit breaker -----------------------------------
@@ -127,6 +142,14 @@ export function SuggestionsColumn({
       if (sinceLast < settings.minRefreshIntervalMs) return;
     }
 
+    // Stamp cooldown + dedup window on gate-pass, not on fetch-success. If
+    // a second trigger races in while this fetch is still pending, the
+    // cooldown gate above must already reflect "we're refreshing right
+    // now". Burning the window on a failed fetch is intentional: it
+    // provides backpressure on a flapping endpoint.
+    lastRefreshAtRef.current = Date.now();
+    lastSentWindowRef.current = win.text;
+
     setError(null);
     setSkipNotice(null);
     setLoading(true);
@@ -167,8 +190,6 @@ export function SuggestionsColumn({
           suggestions: data.suggestions,
         });
       }
-      lastRefreshAtRef.current = Date.now();
-      lastSentWindowRef.current = win.text;
       if (isManual) setAutoRefreshPaused(false);
       setCountdown(settings.autoRefreshSeconds);
     } catch (e) {
