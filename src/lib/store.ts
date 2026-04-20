@@ -16,6 +16,7 @@ import {
 
 const DEFAULT_SETTINGS: Settings = {
   apiKey: "",
+  tavilyKey: "",
   suggestionsPrompt: DEFAULT_SUGGESTIONS_PROMPT,
   detailedAnswerPrompt: DEFAULT_DETAILED_ANSWER_PROMPT,
   chatPrompt: DEFAULT_CHAT_PROMPT,
@@ -102,6 +103,11 @@ interface SessionState {
   addBatch: (b: SuggestionBatch) => void;
   addChatMessage: (m: ChatMessage) => void;
   appendToChatMessage: (id: string, delta: string) => void;
+  setChatMessageContent: (id: string, content: string) => void;
+  setChatMessageSources: (
+    id: string,
+    sources: { title: string; url: string }[]
+  ) => void;
   setLoadingSuggestions: (v: boolean) => void;
   setChatStreaming: (v: boolean) => void;
 
@@ -144,6 +150,14 @@ export const useSession = create<SessionState>()(
       chat: s.chat.map((m) =>
         m.id === id ? { ...m, content: m.content + delta } : m
       ),
+    })),
+  setChatMessageContent: (id, content) =>
+    set((s) => ({
+      chat: s.chat.map((m) => (m.id === id ? { ...m, content } : m)),
+    })),
+  setChatMessageSources: (id, sources) =>
+    set((s) => ({
+      chat: s.chat.map((m) => (m.id === id ? { ...m, sources } : m)),
     })),
   setLoadingSuggestions: (v) => set({ loadingSuggestions: v }),
   setChatStreaming: (v) => set({ chatStreaming: v }),

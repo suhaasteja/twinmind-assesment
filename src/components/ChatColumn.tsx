@@ -6,6 +6,7 @@ import { useSession, useSettings } from "@/lib/store";
 import { ChatMessage, Suggestion } from "@/lib/types";
 import { formatClock, uid } from "@/lib/utils";
 import { InfoCard, Panel, PanelHeader, TypeChip } from "./ui";
+import { runWebSearch, formatSearchForPrompt } from "@/lib/websearch";
 
 export interface ChatColumnHandle {
   sendFromSuggestion: (s: Suggestion) => void;
@@ -21,6 +22,8 @@ export function ChatColumn({
   const chat = useSession((s) => s.chat);
   const addChatMessage = useSession((s) => s.addChatMessage);
   const appendToChatMessage = useSession((s) => s.appendToChatMessage);
+  const setChatMessageContent = useSession((s) => s.setChatMessageContent);
+  const setChatMessageSources = useSession((s) => s.setChatMessageSources);
   const streaming = useSession((s) => s.chatStreaming);
   const setStreaming = useSession((s) => s.setChatStreaming);
 
@@ -48,6 +51,10 @@ export function ChatColumn({
       fromSuggestion?: Suggestion;
       systemPromptOverride?: string;
       contextMinutes?: number;
+      // If set, run a web search with this query BEFORE the chat call and
+      // append the formatted results into the system prompt so the model
+      // grounds the detailed answer on live data.
+      webSearchQuery?: string;
     } = {}
   ) => {
     if (!settings.apiKey) {
@@ -66,6 +73,7 @@ export function ChatColumn({
         ? {
             type: opts.fromSuggestion.type,
             title: opts.fromSuggestion.title,
+            needsWebSearch: opts.fromSuggestion.needsWebSearch,
           }
         : undefined,
     };
@@ -81,11 +89,35 @@ export function ChatColumn({
 
     setStreaming(true);
     try {
-      const systemPrompt =
+      const baseSystemPrompt =
         opts.systemPromptOverride ?? settings.chatPrompt;
       const transcript = buildTranscript(
         opts.contextMinutes ?? settings.detailedContextMinutes
       );
+
+      // Optional web-search grounding step. We append the formatted results
+      // to the system prompt rather than passing them as a separate user
+      // turn so the model treats them as authoritative context and follows
+      // the citation rule in DEFAULT_DETAILED_ANSWER_PROMPT.
+      let systemPrompt = baseSystemPrompt;
+      if (opts.webSearchQuery) {
+        setChatMessageContent(assistantId, "🔎 Searching the web…");
+        const search = await runWebSearch(
+          opts.webSearchQuery,
+          settings.tavilyKey
+        );
+        systemPrompt = `${baseSystemPrompt}\n\n${formatSearchForPrompt(search)}`;
+        // Clear the placeholder so the streamed answer isn't prefixed with it.
+        setChatMessageContent(assistantId, "");
+        // Persist the source list on the assistant message so we can render
+        // a clickable references footer and include it in the session export.
+        if (search.results.length > 0) {
+          setChatMessageSources(
+            assistantId,
+            search.results.map((r) => ({ title: r.title, url: r.url }))
+          );
+        }
+      }
       const history = chat
         .filter((m) => m.role === "user" || m.role === "assistant")
         .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
@@ -135,6 +167,10 @@ export function ChatColumn({
           fromSuggestion: s,
           systemPromptOverride: settings.detailedAnswerPrompt,
           contextMinutes: settings.detailedContextMinutes,
+          // Only the flagged cards trigger a web search. The title — which
+          // per the updated prompt already names the specific claim being
+          // checked — is the cleanest query.
+          webSearchQuery: s.needsWebSearch ? s.title : undefined,
         });
       },
     });
@@ -201,6 +237,34 @@ export function ChatColumn({
             >
               {m.content || (m.role === "assistant" && streaming ? "…" : "")}
             </div>
+            {m.role === "assistant" && m.sources && m.sources.length > 0 && (
+              <div
+                className="mt-2 rounded-md border px-3 py-2 text-[11px] leading-relaxed"
+                style={{
+                  borderColor: "var(--border)",
+                  background: "rgba(56,189,248,0.05)",
+                }}
+              >
+                <div className="mb-1 uppercase tracking-[0.12em] text-[var(--muted-2)]">
+                  Sources
+                </div>
+                <ol className="list-decimal space-y-0.5 pl-4 text-[var(--muted)]">
+                  {m.sources.map((src, i) => (
+                    <li key={i}>
+                      <a
+                        href={src.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#7dd3fc] underline-offset-2 hover:underline"
+                        title={src.url}
+                      >
+                        {src.title || src.url}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </div>
         ))}
       </div>

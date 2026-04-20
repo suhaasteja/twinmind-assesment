@@ -83,14 +83,28 @@ export async function POST(req: NextRequest) {
   const cleaned: Suggestion[] = (parsed.suggestions ?? [])
     .filter((s) => s && s.title && s.preview && s.type)
     .slice(0, 3)
-    .map((s, i) => ({
-      id: `${Date.now().toString(36)}-${i}`,
-      type: VALID_TYPES.includes(s.type as SuggestionType)
+    .map((s, i) => {
+      const type = VALID_TYPES.includes(s.type as SuggestionType)
         ? (s.type as SuggestionType)
-        : "talking_point",
-      title: String(s.title).slice(0, 140),
-      preview: String(s.preview).slice(0, 500),
-    }));
+        : "talking_point";
+      // Web-search flag policy (mirrors the prompt):
+      //   - fact_check  → default true (force-on even if the model forgot).
+      //   - clarify     → default true (force-on even if the model forgot).
+      //   - answer      → honor the model's choice; true only if it set it.
+      //   - question / talking_point → always false, strip if the model set it.
+      const rawFlag = (s as { needsWebSearch?: unknown }).needsWebSearch;
+      const modelFlagged = rawFlag === true || rawFlag === "true";
+      let flagged = false;
+      if (type === "fact_check" || type === "clarify") flagged = true;
+      else if (type === "answer") flagged = modelFlagged;
+      return {
+        id: `${Date.now().toString(36)}-${i}`,
+        type,
+        title: String(s.title).slice(0, 140),
+        preview: String(s.preview).slice(0, 500),
+        needsWebSearch: flagged || undefined,
+      };
+    });
 
   return NextResponse.json({ suggestions: cleaned });
 }

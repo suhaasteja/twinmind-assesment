@@ -14,6 +14,7 @@ import {
 import { buildSuggestionsPrompt, DEFAULT_SUMMARY_PROMPT } from "@/lib/prompts";
 import { Suggestion } from "@/lib/types";
 import { InfoCard, Panel, PanelHeader, TypeChip } from "./ui";
+import { WebSearchChip } from "./WebSearchChip";
 
 type RefreshTrigger = "auto" | "manual" | "interrupt";
 
@@ -406,6 +407,11 @@ export function SuggestionsColumn({
                 {s.preview && s.preview !== s.title && (
                   <div className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">
                     {s.preview}
+                  </div>
+                )}
+                {s.needsWebSearch && settings.tavilyKey && (
+                  <div className="mt-2">
+                    <WebSearchChip />
                   </div>
                 )}
               </button>

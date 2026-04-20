@@ -65,6 +65,19 @@ export function SettingsDialog({
           </Field>
 
           <Field
+            label="Tavily API Key (optional)"
+            hint="Enables live web search when you click a fact-check/answer card tagged 'click to web-search'. Get one from app.tavily.com. Leave blank to skip — the detailed answer will just note that grounding was unavailable."
+          >
+            <input
+              type="password"
+              value={draft.tavilyKey}
+              onChange={(e) => setDraft({ ...draft, tavilyKey: e.target.value })}
+              placeholder="tvly-..."
+              className={inputCls}
+            />
+          </Field>
+
+          <Field
             label="Meeting kind"
             hint="Tunes the suggestion type mix and tone to the situation. Takes effect on the next refresh."
           >
