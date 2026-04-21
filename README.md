@@ -1,75 +1,70 @@
 # TwinMind — Live Meeting Copilot
 
-A browser-based Jarvis for meetings. Mic → transcription in ~30s chunks → 3 context-aware suggestions → one-click detailed answer in a side chat, with optional live web grounding.
+A browser-based copilot for live meetings. It listens through your mic, transcribes in ~30s chunks, surfaces three context-aware suggestions every refresh, and streams a detailed answer in a side chat whenever you tap a card — with optional live web grounding for claims it shouldn't guess at.
 
-Built to [`assignment.md`](./assignment.md). The next section maps every spec bullet to where it's implemented — start there.
-
-## Run locally
+## Quick start
 
 ```bash
 npm install
 npm run dev
-# opens http://localhost:3000
+# http://localhost:3000
 ```
 
-1. Click **Settings** → paste a **Groq API key** ([console.groq.com](https://console.groq.com)).
-2. (Optional) Paste a **Tavily API key** ([app.tavily.com](https://app.tavily.com)) to enable click-time web search.
-3. Click the mic, or use **Play mock** to demo with a pre-recorded podcast transcript at 2×–10× speed (useful if you don't want to speak into a mic).
+1. Open **Settings** and paste a **Groq API key** ([console.groq.com](https://console.groq.com)).
+2. *(Optional)* Paste a **Tavily API key** ([app.tavily.com](https://app.tavily.com)) to enable click-time web search.
+3. Click the mic — or hit **Play mock** to demo with a pre-recorded podcast transcript (1×–10× speed) without granting mic access.
 
-Keys are held only in browser `localStorage` and forwarded via per-request headers. No `.env` required.
+Keys stay in browser `localStorage` and are forwarded to server routes via per-request headers. No `.env` required.
 
-## How it meets the assignment spec
+## What it does
 
-### Mic + transcript (left column)
+### Transcript (left column)
 
-- **Start/stop mic button** — `TranscriptColumn.tsx` mic button (red dot while recording).
-- **Chunks every ~30 seconds** — `settings.chunkSeconds` (default 30); `MediaRecorder` stops and restarts per chunk so each upload is a self-contained, Whisper-decodable webm/opus file (more reliable than `timeslice` fragments).
-- **Auto-scroll to latest line** — `useEffect` on `chunks.length` in `TranscriptColumn.tsx`.
+Start/stop mic. Audio is chunked every ~30s by stopping and restarting `MediaRecorder` so every upload is a complete, Whisper-decodable webm/opus file. Chunks render as timestamped lines and auto-scroll. A **Clear** button wipes the session.
 
 ### Live suggestions (middle column)
 
-- **Auto-refresh every ~30s** — countdown visible in the header; `settings.autoRefreshSeconds` (default 30).
-- **Manual refresh button** — `Reload suggestions` in `SuggestionsColumn.tsx` header.
-- **Exactly 3 fresh suggestions per refresh** — enforced in the system prompt and by `.slice(0, 3)` in the suggest parser.
-- **New batch on top, older batches below** — batches stack with `bIdx === 0` at full opacity; older ones fade.
-- **Tappable cards with a useful preview** — each card is a `<button>`; the preview is self-sufficient (usable fact or phrasing) per strict prompt rules. Clicking routes to the chat.
-- **Context-appropriate type mix** — five types (`question` / `talking_point` / `answer` / `fact_check` / `clarify`). Prompt rules force an `answer` when there's an unanswered question, prefer `fact_check` on concrete claims, `clarify` on missing context, and `question`/`talking_point` when the conversation drifts. Meeting-kind presets (lecture / 1:1 / pitch / standup / interview) tune the mix and tone further.
+Auto-refreshes every `autoRefreshSeconds` (default 30s), with a visible countdown and a manual reload button. Each refresh produces **exactly three** fresh cards, new batch on top, older batches fading below.
+
+Cards are typed — `question`, `talking_point`, `answer`, `fact_check`, `clarify` — and mixed by the prompt: if an unanswered question sits in the transcript an `answer` is forced; concrete claims invite `fact_check`; missing context invites `clarify`; drift invites `question` / `talking_point`. **Meeting-kind presets** (general / lecture / 1:1 / pitch / standup / interview) append a short hint that shifts the type-mix and tone.
+
+Every preview is written to stand on its own — a usable fact or phrasing, never a teaser. When the model can't know a concrete value without grounding, it flags the card instead of guessing.
 
 ### Chat (right column)
 
-- **Click suggestion → detailed answer in chat** — `sendFromSuggestion()` in `ChatColumn.tsx` seeds the chat with a suggestion-chip header and streams a longer detailed-answer prompt back.
-- **Wider context** — detailed-answer call sends the **full transcript** by default (`detailedContextMinutes: 0`) plus the entire prior chat history.
-- **Free-form typed questions** — the text input below the chat goes through the same stream with the shorter `chatPrompt`.
-- **One continuous chat per session, no login** — single in-memory chat array in the Zustand store.
-- **Reload behavior** — the store is wrapped in `persist` so transcript / batches / chat / summary survive accidental reloads. The **Clear** button in the transcript column is the explicit reset (wipes all state including the rolling summary). The spec only says persistence isn't required; this is a small UX win on top.
+One continuous, streaming chat. Tapping a suggestion seeds the chat with a card header and streams a longer detailed answer that sees the **full transcript** plus prior chat history. You can also type free-form questions — same stream, lighter prompt.
+
+The session store persists across accidental reloads; the transcript's **Clear** button is the explicit reset.
 
 ### Export
 
-- **Full session JSON** — `export.ts` emits transcript chunks, suggestion batches, chat messages, and (when present) web-search sources — all with ISO timestamps. Downloadable from the top bar.
+One-click JSON download of the full session: transcript chunks, every suggestion batch, the chat transcript, and any web-search sources — all ISO-timestamped.
 
-## Beyond the spec
+## Web search, on click
 
-### Click-time web search (`fact_check` / `clarify` / time-sensitive `answer`)
+The suggest model marks `fact_check` and `clarify` cards (and time-sensitive `answer`s) with `needsWebSearch: true`. If a Tavily key is configured, those cards render a `🌐 click to web-search` chip. Clicking one:
 
-The suggest model sets `needsWebSearch: true` on cards whose concrete value it shouldn't guess. The parser force-ons this for every `fact_check` and `clarify`. Flagged cards render a `🌐 click to web-search` chip (only if a Tavily key is configured). Clicking a flagged card → chat shows `🔎 Searching the web…` → Tavily returns top-5 results → they're injected into the detailed-answer system prompt as a `WEB SEARCH RESULTS:` block → the streamed answer cites inline and a clickable **Sources** footer renders under it (preserved in the export).
+1. The chat shows `🔎 Searching the web…`.
+2. Tavily returns the top 5 results.
+3. They're injected into the detailed-answer system prompt as a `WEB SEARCH RESULTS:` block.
+4. The answer streams back with inline citations and a clickable **Sources** footer — preserved in the export.
 
-### Suggestion quality
+If the key isn't set, the chip is hidden and suggestions still work (just without live grounding).
 
-- **Strict JSON schema**, enforced with Groq's `response_format: { type: "json_object" }`.
-- **Anti-fabrication guardrail** in the prompt: numbers/dates/ranges must be grounded or deferred to web search — never invented.
-- **User-editable prompts** — all three (suggestions / detailed-answer / chat) editable in Settings with a Reset button.
+## Design details worth calling out
 
-### Latency & cost
-
-- **Streaming** chat (server parses Groq SSE, forwards plain text deltas).
-- **Parallel transcription** — each chunk uploads independently; UI never blocks.
+- **Strict JSON schema** on suggestions, enforced with Groq's `response_format: { type: "json_object" }`.
+- **Anti-fabrication guardrail** — the prompt forbids invented numbers, dates, ranges, or provenance. Un-groundable facts defer to web search instead of being guessed.
 - **Rolling summary** compresses older transcript into ≤200 words every 6 chunks, so the suggest prompt stays small (recent ~5 min verbatim + summary of everything before).
-- **Adaptive cadence** — per-refresh cooldown, in-flight transcribe defer, Jaccard dedup on identical windows, circuit breaker on consecutive transcribe errors (`ADAPTIVE_CADENCE.md`).
-- **Interrupt triggers** — off-cycle refresh when the transcript shows an unanswered question, decision phrase, or named claim (`signals.ts`).
+- **Adaptive cadence** — per-refresh cooldown, in-flight transcribe defer, Jaccard dedup on near-identical windows, and a circuit breaker on consecutive transcribe errors. See `ADAPTIVE_CADENCE.md`.
+- **Interrupt triggers** — an off-cycle refresh fires when the transcript shows an unanswered question, decision phrase, or named claim (`signals.ts`).
+- **Streaming everywhere** — suggest uses JSON-mode; chat streams Groq SSE → plain-text deltas.
+- **Parallel transcription** — each chunk uploads independently so the UI never blocks.
+- **Editable prompts** — all three system prompts live in `src/lib/prompts.ts` and are editable in Settings with a Reset button.
 
-### Mock playback (for reviewers without mic access)
+## Mock playback
 
-`Play mock` plays a pre-recorded transcript (default: TwinMind founder podcast with speaker labels) at 1×–10× speed. No mic permission, no Whisper calls. Every feature above is visible in this mode.
+If you don't want to grant mic access, **Play mock** streams a pre-recorded transcript (default: TwinMind founder podcast with speaker labels) at 1×–10×. Everything above — suggestions, chat, web search, export — works the same.
 
 ## Stack
 
@@ -112,10 +107,7 @@ src/
 
 ## Deploy
 
-Any Node host. Tested on Vercel (`npx vercel`).
-
-- `TAVILY_API_KEY` env var is optional — if set, users don't need to paste the Tavily key in Settings.
-- No other env vars required.
+Any Node host. Tested on Vercel (`npx vercel`). Build with `npm run build && npm start` elsewhere. `TAVILY_API_KEY` is an optional env var — if set, users don't need to paste the Tavily key in Settings. No other env vars required.
 
 ## Further reading
 
