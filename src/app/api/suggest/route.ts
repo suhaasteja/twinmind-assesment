@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { getKey, groqChat } from "@/lib/groq";
 import { Suggestion, SuggestionType } from "@/lib/types";
 
@@ -20,6 +21,123 @@ const VALID_TYPES: SuggestionType[] = [
   "fact_check",
   "clarify",
 ];
+
+// ---------------------------------------------------------------------------
+// Zod schema — the TS equivalent of a Pydantic model. One source of truth
+// for both the Groq `json_schema` response_format (server-enforced by the
+// model) and the second-line validator we run after parse.
+// ---------------------------------------------------------------------------
+const SuggestionSchema = z.object({
+  type: z.enum(["question", "talking_point", "answer", "fact_check", "clarify"]),
+  title: z.string().min(1).max(140),
+  preview: z.string().min(1).max(500),
+  needsWebSearch: z.boolean().optional(),
+});
+
+const SuggestionsPayloadSchema = z.object({
+  suggestions: z.array(SuggestionSchema).length(3),
+});
+
+type ValidSuggestion = z.infer<typeof SuggestionSchema>;
+
+// JSON-Schema flavor of the same schema, with the keys Groq's strict mode
+// requires: `additionalProperties: false` and every declared property in
+// `required`. Kept hand-written (vs. zod-to-json-schema) to avoid a dep.
+const JSON_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["suggestions"],
+  properties: {
+    suggestions: {
+      type: "array",
+      minItems: 3,
+      maxItems: 3,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["type", "title", "preview", "needsWebSearch"],
+        properties: {
+          type: { type: "string", enum: VALID_TYPES },
+          title: { type: "string", maxLength: 140 },
+          preview: { type: "string", maxLength: 500 },
+          needsWebSearch: { type: "boolean" },
+        },
+      },
+    },
+  },
+} as const;
+
+// ---------------------------------------------------------------------------
+// Calls Groq once. Returns the raw content string or an upstream-error tuple.
+// ---------------------------------------------------------------------------
+async function callGroq(
+  apiKey: string,
+  model: string,
+  messages: Array<{ role: "system" | "user" | "assistant"; content: string }>,
+  useJsonSchema: boolean
+): Promise<
+  | { ok: true; content: string }
+  | { ok: false; status: number; text: string; schemaUnsupported: boolean }
+> {
+  const res = await groqChat(apiKey, {
+    model,
+    temperature: 0.4,
+    max_tokens: 700,
+    response_format: useJsonSchema
+      ? {
+          type: "json_schema",
+          json_schema: {
+            name: "suggestions",
+            strict: true,
+            schema: JSON_SCHEMA,
+          },
+        }
+      : { type: "json_object" },
+    messages,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    // Heuristic: if Groq refuses json_schema for this model, its 400 will
+    // mention response_format. Used to trigger a one-shot fallback below.
+    const schemaUnsupported =
+      res.status === 400 &&
+      useJsonSchema &&
+      /response_format|json_schema/i.test(text);
+    return { ok: false, status: res.status, text, schemaUnsupported };
+  }
+  const data = (await res.json()) as {
+    choices?: { message?: { content?: string } }[];
+  };
+  return { ok: true, content: data.choices?.[0]?.message?.content ?? "{}" };
+}
+
+// ---------------------------------------------------------------------------
+// Tries to pull a Zod-valid payload out of a raw model string. On JSON-parse
+// or schema failure returns the error message so the caller can decide
+// whether to retry.
+// ---------------------------------------------------------------------------
+function tryParse(
+  raw: string
+):
+  | { ok: true; value: z.infer<typeof SuggestionsPayloadSchema> }
+  | { ok: false; reason: string } {
+  let json: unknown;
+  try {
+    json = JSON.parse(raw);
+  } catch (e) {
+    return { ok: false, reason: `JSON parse error: ${(e as Error).message}` };
+  }
+  const parsed = SuggestionsPayloadSchema.safeParse(json);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      reason: `Schema validation failed: ${parsed.error.issues
+        .map((i) => `${i.path.join(".") || "<root>"}: ${i.message}`)
+        .join("; ")}`,
+    };
+  }
+  return { ok: true, value: parsed.data };
+}
 
 export async function POST(req: NextRequest) {
   const apiKey = getKey(req);
@@ -46,65 +164,117 @@ export async function POST(req: NextRequest) {
     .filter(Boolean)
     .join("\n\n");
 
-  const res = await groqChat(apiKey, {
-    model,
-    temperature: 0.4,
-    max_tokens: 700,
-    response_format: { type: "json_object" },
-    messages: [
-      { role: "system", content: prompt },
-      { role: "user", content: userContent },
-    ],
-  });
+  const baseMessages: Array<{
+    role: "system" | "user" | "assistant";
+    content: string;
+  }> = [
+    { role: "system", content: prompt },
+    { role: "user", content: userContent },
+  ];
 
-  if (!res.ok) {
-    const text = await res.text();
+  // ---- Attempt 1: strict `json_schema` ------------------------------------
+  let attempt = await callGroq(apiKey, model, baseMessages, true);
+
+  // If the model rejects json_schema, retry once with json_object.
+  if (!attempt.ok && attempt.schemaUnsupported) {
+    attempt = await callGroq(apiKey, model, baseMessages, false);
+  }
+
+  if (!attempt.ok) {
     return NextResponse.json(
-      { error: `Groq suggest failed: ${res.status} ${text}` },
-      { status: res.status }
+      { error: `Groq suggest failed: ${attempt.status} ${attempt.text}` },
+      { status: attempt.status }
     );
   }
 
-  const data = (await res.json()) as {
-    choices: { message: { content: string } }[];
-  };
-  const raw = data.choices?.[0]?.message?.content ?? "{}";
+  let raw = attempt.content;
+  let parsed = tryParse(raw);
 
-  let parsed: { suggestions?: Array<Partial<Suggestion>> } = {};
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
+  // ---- Attempt 2: feedback retry on Zod failure ---------------------------
+  // Hands the model its own malformed output plus the exact validation error
+  // and asks it to correct itself. Cheap, usually succeeds, and kept single-
+  // shot so we never loop.
+  if (!parsed.ok) {
+    const retry = await callGroq(
+      apiKey,
+      model,
+      [
+        ...baseMessages,
+        { role: "assistant", content: raw },
+        {
+          role: "user",
+          content: `Your previous response failed validation: ${parsed.reason}. Reply with ONLY corrected JSON matching the schema — no prose, no markdown, exactly 3 suggestions.`,
+        },
+      ],
+      false // json_object mode for the retry to maximize compatibility
+    );
+    if (retry.ok) {
+      raw = retry.content;
+      parsed = tryParse(raw);
+    }
+  }
+
+  // ---- Fallback: permissive salvage ---------------------------------------
+  // Last-ditch attempt so the UI never gets a 502 on a near-miss. Trims to
+  // the first 3 well-formed items and coerces unknown types to talking_point.
+  const cleaned: Suggestion[] = parsed.ok
+    ? parsed.value.suggestions.map((s, i) => finalize(s, i))
+    : salvage(raw);
+
+  if (cleaned.length !== 3) {
     return NextResponse.json(
-      { error: "Model returned invalid JSON", raw },
+      { error: "Model returned an unparseable payload", raw },
       { status: 502 }
     );
   }
 
-  const cleaned: Suggestion[] = (parsed.suggestions ?? [])
+  return NextResponse.json({ suggestions: cleaned });
+}
+
+// Schema-validated row → Suggestion. Applies the web-search flag policy:
+//   - fact_check / clarify → always flagged (force-on).
+//   - answer               → honor the model's boolean.
+//   - question / talking_point → always false.
+function finalize(s: ValidSuggestion, i: number): Suggestion {
+  let flagged = false;
+  if (s.type === "fact_check" || s.type === "clarify") flagged = true;
+  else if (s.type === "answer") flagged = s.needsWebSearch === true;
+  return {
+    id: `${Date.now().toString(36)}-${i}`,
+    type: s.type,
+    title: s.title.slice(0, 140),
+    preview: s.preview.slice(0, 500),
+    needsWebSearch: flagged || undefined,
+  };
+}
+
+// Permissive fallback for the case where both the strict call and the
+// feedback retry failed Zod. Mirrors the pre-Zod behavior so we still return
+// *something* usable rather than erroring out the UI.
+function salvage(raw: string): Suggestion[] {
+  let parsed: { suggestions?: Array<Partial<Suggestion>> } = {};
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  return (parsed.suggestions ?? [])
     .filter((s) => s && s.title && s.preview && s.type)
     .slice(0, 3)
     .map((s, i) => {
       const type = VALID_TYPES.includes(s.type as SuggestionType)
         ? (s.type as SuggestionType)
         : "talking_point";
-      // Web-search flag policy (mirrors the prompt):
-      //   - fact_check  → default true (force-on even if the model forgot).
-      //   - clarify     → default true (force-on even if the model forgot).
-      //   - answer      → honor the model's choice; true only if it set it.
-      //   - question / talking_point → always false, strip if the model set it.
       const rawFlag = (s as { needsWebSearch?: unknown }).needsWebSearch;
       const modelFlagged = rawFlag === true || rawFlag === "true";
-      let flagged = false;
-      if (type === "fact_check" || type === "clarify") flagged = true;
-      else if (type === "answer") flagged = modelFlagged;
-      return {
-        id: `${Date.now().toString(36)}-${i}`,
-        type,
-        title: String(s.title).slice(0, 140),
-        preview: String(s.preview).slice(0, 500),
-        needsWebSearch: flagged || undefined,
-      };
+      return finalize(
+        {
+          type,
+          title: String(s.title),
+          preview: String(s.preview),
+          needsWebSearch: modelFlagged,
+        },
+        i
+      );
     });
-
-  return NextResponse.json({ suggestions: cleaned });
 }
