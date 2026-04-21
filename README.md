@@ -1,78 +1,84 @@
-# TwinMind — Live Suggestions
+# TwinMind — Live Meeting Copilot
 
-A live meeting copilot in the browser. Listens to your mic, transcribes every ~30s, and continuously surfaces **3 useful suggestions** based on what's being said. Clicking a suggestion opens a detailed, streamed answer in a session-only chat. Built to the [assignment spec](../assignment.md).
+A browser-based Jarvis for meetings. Mic → transcription in ~30s chunks → 3 context-aware suggestions → one-click detailed answer in a side chat, with optional live web grounding.
 
-## Stack
-
-- **Next.js 14** (App Router) + **TypeScript** — single deploy, API routes proxy Groq so the key doesn't hit CORS.
-- **TailwindCSS** + **lucide-react** — dark UI tuned to the reference mockup.
-- **Zustand** — small in-memory session store (transcript, batches, chat).
-- **Groq** — `whisper-large-v3` for STT, `openai/gpt-oss-120b` for suggestions + chat (SSE streamed).
-- **`MediaRecorder`** — one self-contained webm/opus blob per chunk (simpler + decodable by Whisper, unlike `timeslice` fragments).
+Built to [`assignment.md`](./assignment.md). The next section maps every spec bullet to where it's implemented — start there.
 
 ## Run locally
 
 ```bash
-cd app
 npm install
 npm run dev
-# open http://localhost:3000, click Settings, paste a Groq key from console.groq.com
+# opens http://localhost:3000
 ```
 
-No env var is needed — the API key is stored only in browser `localStorage` and sent to server routes via an `x-groq-key` header per request.
+1. Click **Settings** → paste a **Groq API key** ([console.groq.com](https://console.groq.com)).
+2. (Optional) Paste a **Tavily API key** ([app.tavily.com](https://app.tavily.com)) to enable click-time web search.
+3. Click the mic, or use **Play mock** to demo with a pre-recorded podcast transcript at 2×–10× speed (useful if you don't want to speak into a mic).
 
-## Layout
+Keys are held only in browser `localStorage` and forwarded via per-request headers. No `.env` required.
 
-Three columns, matching the prototype:
+## How it meets the assignment spec
 
-1. **Mic & Transcript** — Start/stop mic, timestamped chunks every `chunkSeconds` (default 30s), auto-scroll, Recording/Idle badge.
-2. **Live Suggestions** — Auto-refresh every `autoRefreshSeconds` (default 30s) plus manual reload. Each batch = exactly 3 typed cards (`QUESTION TO ASK`, `TALKING POINT`, `ANSWER`, `FACT-CHECK`, `CLARIFY`). New batches push in at the top; older batches stay visible and fade with depth.
-3. **Chat (Detailed Answers)** — Session-only, streaming. Click a suggestion to seed a detailed answer (separate, longer prompt + wider transcript context). Also accepts free-form questions.
+### Mic + transcript (left column)
 
-Top bar: **Export** (full session JSON with ISO timestamps for every chunk, batch, and message) and **Settings**.
+- **Start/stop mic button** — `TranscriptColumn.tsx` mic button (red dot while recording).
+- **Chunks every ~30 seconds** — `settings.chunkSeconds` (default 30); `MediaRecorder` stops and restarts per chunk so each upload is a self-contained, Whisper-decodable webm/opus file (more reliable than `timeslice` fragments).
+- **Auto-scroll to latest line** — `useEffect` on `chunks.length` in `TranscriptColumn.tsx`.
 
-## Prompt strategy
+### Live suggestions (middle column)
 
-All three prompts are in `src/lib/prompts.ts` and are fully editable via the Settings dialog (with a "Reset prompts" button).
+- **Auto-refresh every ~30s** — countdown visible in the header; `settings.autoRefreshSeconds` (default 30).
+- **Manual refresh button** — `Reload suggestions` in `SuggestionsColumn.tsx` header.
+- **Exactly 3 fresh suggestions per refresh** — enforced in the system prompt and by `.slice(0, 3)` in the suggest parser.
+- **New batch on top, older batches below** — batches stack with `bIdx === 0` at full opacity; older ones fade.
+- **Tappable cards with a useful preview** — each card is a `<button>`; the preview is self-sufficient (usable fact or phrasing) per strict prompt rules. Clicking routes to the chat.
+- **Context-appropriate type mix** — five types (`question` / `talking_point` / `answer` / `fact_check` / `clarify`). Prompt rules force an `answer` when there's an unanswered question, prefer `fact_check` on concrete claims, `clarify` on missing context, and `question`/`talking_point` when the conversation drifts. Meeting-kind presets (lecture / 1:1 / pitch / standup / interview) tune the mix and tone further.
 
-**Live suggestions** (`/api/suggest`):
+### Chat (right column)
 
-- Strict JSON schema, enforced with Groq's `response_format: { type: "json_object" }`.
-- Five suggestion types encode the possible UX moves: `question`, `talking_point`, `answer`, `fact_check`, `clarify`.
-- Explicit **timing rules** baked into the system prompt:
-  1. If the transcript has an unanswered question, at least one suggestion **must** be an `answer`.
-  2. If a factual claim was just made, prefer `fact_check`.
-  3. If the conversation is drifting, prefer `question` / `talking_point`.
-  4. Mix types across the 3 — no triples-of-the-same unless the moment demands it.
-  5. Previous-batch titles are passed in and must not be repeated.
-- Preview text must be **self-sufficient** (a number, a concrete recommendation, a phrasing) — not a teaser.
-- Context window is a rolling "last N minutes" slice (default 5 min) of timestamped chunks. Short slices = faster, fresher suggestions; older content is intended to live in a rolling summary (hook present; can be turned on for very long meetings).
+- **Click suggestion → detailed answer in chat** — `sendFromSuggestion()` in `ChatColumn.tsx` seeds the chat with a suggestion-chip header and streams a longer detailed-answer prompt back.
+- **Wider context** — detailed-answer call sends the **full transcript** by default (`detailedContextMinutes: 0`) plus the entire prior chat history.
+- **Free-form typed questions** — the text input below the chat goes through the same stream with the shorter `chatPrompt`.
+- **One continuous chat per session, no login** — single in-memory chat array in the Zustand store.
+- **Reload behavior** — the store is wrapped in `persist` so transcript / batches / chat / summary survive accidental reloads. The **Clear** button in the transcript column is the explicit reset (wipes all state including the rolling summary). The spec only says persistence isn't required; this is a small UX win on top.
 
-**Detailed answer on click** (`/api/chat` with `detailedAnswerPrompt`):
+### Export
 
-- Separate, longer prompt tuned for the "read in 15 seconds and act" moment.
-- First sentence = the answer. Then 2–5 tight bullets with specifics.
-- Per-type behavior (`answer` → answer the question, `fact_check` → state right/wrong + corrected fact, etc.).
-- Receives a wider transcript window (0 = full transcript by default).
+- **Full session JSON** — `export.ts` emits transcript chunks, suggestion batches, chat messages, and (when present) web-search sources — all with ISO timestamps. Downloadable from the top bar.
 
-**Typed chat** (`/api/chat` with `chatPrompt`):
+## Beyond the spec
 
-- Shorter system prompt. Grounds in transcript when asked about the meeting; answers normally otherwise.
+### Click-time web search (`fact_check` / `clarify` / time-sensitive `answer`)
 
-## Latency choices
+The suggest model sets `needsWebSearch: true` on cards whose concrete value it shouldn't guess. The parser force-ons this for every `fact_check` and `clarify`. Flagged cards render a `🌐 click to web-search` chip (only if a Tavily key is configured). Clicking a flagged card → chat shows `🔎 Searching the web…` → Tavily returns top-5 results → they're injected into the detailed-answer system prompt as a `WEB SEARCH RESULTS:` block → the streamed answer cites inline and a clickable **Sources** footer renders under it (preserved in the export).
 
-- **Streaming** on chat (SSE parsed server-side, forwarded as plain text deltas — lean client).
-- **Parallel** transcription: each chunk uploads independently; the UI never blocks on the previous one.
-- **Small max_tokens** on suggestions (700) — they're short by design, so there's no reason to pay the tail.
-- **`temperature=0`** for STT; **0.4** for suggestions (some variety), **0.5** for chat.
-- **Skip silence**: chunks under 2 KB are dropped server-side before hitting Whisper.
+### Suggestion quality
 
-## Tradeoffs
+- **Strict JSON schema**, enforced with Groq's `response_format: { type: "json_object" }`.
+- **Anti-fabrication guardrail** in the prompt: numbers/dates/ranges must be grounded or deferred to web search — never invented.
+- **User-editable prompts** — all three (suggestions / detailed-answer / chat) editable in Settings with a Reset button.
 
-- **`MediaRecorder` stop/restart per chunk** instead of `timeslice`: each chunk is a valid, decodable file. Costs ~a frame of audio at the seam; worth it for reliability.
-- **No rolling summary yet** — the hook is in `/api/suggest` (`meetingSummary` field). In a 2-hour meeting you'd want to generate one every ~5 batches to keep long-term context without growing prompt size. Left out to keep the first version tight.
-- **localStorage key** is simpler and matches the spec ("paste your own key"); a production build would use a short-lived signed token from a server-side secret.
-- **In-memory session only** — reloads wipe state, per spec.
+### Latency & cost
+
+- **Streaming** chat (server parses Groq SSE, forwards plain text deltas).
+- **Parallel transcription** — each chunk uploads independently; UI never blocks.
+- **Rolling summary** compresses older transcript into ≤200 words every 6 chunks, so the suggest prompt stays small (recent ~5 min verbatim + summary of everything before).
+- **Adaptive cadence** — per-refresh cooldown, in-flight transcribe defer, Jaccard dedup on identical windows, circuit breaker on consecutive transcribe errors (`ADAPTIVE_CADENCE.md`).
+- **Interrupt triggers** — off-cycle refresh when the transcript shows an unanswered question, decision phrase, or named claim (`signals.ts`).
+
+### Mock playback (for reviewers without mic access)
+
+`Play mock` plays a pre-recorded transcript (default: TwinMind founder podcast with speaker labels) at 1×–10× speed. No mic permission, no Whisper calls. Every feature above is visible in this mode.
+
+## Stack
+
+- **Next.js 14** (App Router) + **TypeScript** — single deploy; API routes proxy all third-party calls so keys never hit CORS.
+- **TailwindCSS** + **lucide-react** — dark UI.
+- **Zustand** (+ `persist`) — session store.
+- **Groq** — `whisper-large-v3` for STT, `openai/gpt-oss-120b` for suggestions + chat (SSE).
+- **Tavily** (optional) — web search on flagged clicks.
+- **`MediaRecorder`** — per-chunk stop/restart for clean webm/opus blobs.
 
 ## File map
 
@@ -81,25 +87,38 @@ src/
   app/
     api/
       transcribe/route.ts   # Groq Whisper proxy
-      suggest/route.ts      # JSON-mode suggestions (3, typed)
-      chat/route.ts         # SSE -> text streaming proxy
+      suggest/route.ts      # JSON-mode suggestions, permissive needsWebSearch parser
+      chat/route.ts         # SSE → plain-text streaming proxy
+      websearch/route.ts    # Tavily proxy; graceful no-key fallback
     layout.tsx, page.tsx    # 3-column shell
     globals.css             # dark theme tokens
   components/
-    TranscriptColumn.tsx
-    SuggestionsColumn.tsx
-    ChatColumn.tsx
-    SettingsDialog.tsx
-    ui.tsx                  # Panel, Button, TypeChip, StatusDot
+    TranscriptColumn.tsx    # mic / mock / clear
+    SuggestionsColumn.tsx   # cards, interrupt triggers, rolling summary loop
+    ChatColumn.tsx          # streaming chat, web-search branch, sources footer
+    SettingsDialog.tsx      # keys, prompts, meeting kind, cadence knobs
+    WebSearchChip.tsx       # "click to web-search" chip (flagged cards)
+    ui.tsx                  # Panel, TypeChip, StatusDot, etc.
   lib/
-    prompts.ts              # all default prompts
-    store.ts                # zustand: settings (persisted) + session (in-memory)
-    groq.ts                 # tiny fetch wrappers for Groq endpoints
-    audio.ts                # chunked MediaRecorder
-    export.ts               # session -> JSON download
+    prompts.ts              # editable defaults + meeting-kind hints
+    store.ts                # zustand: settings + session
+    groq.ts, audio.ts
+    websearch.ts            # Tavily client + WEB SEARCH RESULTS formatter
+    signals.ts              # interrupt-trigger heuristics
+    export.ts               # session → JSON download
+    mockTranscripts.ts, mockPlayer.ts
     types.ts, utils.ts
 ```
 
 ## Deploy
 
-Any static/Node host. Tested on Vercel (`npx vercel`). No env vars required.
+Any Node host. Tested on Vercel (`npx vercel`).
+
+- `TAVILY_API_KEY` env var is optional — if set, users don't need to paste the Tavily key in Settings.
+- No other env vars required.
+
+## Further reading
+
+- `ARCHITECTURE.md` — component + data-flow diagrams.
+- `ADAPTIVE_CADENCE.md` — refresh-cadence scenarios and tuning.
+- `DESIGN.md`, `PRODUCT_ALIGNMENT.md`, `FUTURE_WORK.md` — design journal.
