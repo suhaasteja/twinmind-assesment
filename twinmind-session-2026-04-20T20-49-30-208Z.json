@@ -1,0 +1,106 @@
+{
+  "session": {
+    "startedAt": "2026-04-20T20:46:02.464Z",
+    "exportedAt": "2026-04-20T20:49:30.208Z"
+  },
+  "transcript": [
+    {
+      "startedAt": "2026-04-20T20:46:05.440Z",
+      "endedAt": "2026-04-20T20:46:35.440Z",
+      "text": "It requires a lot of money. How much money is needed to create something like the world's best speech-to-text model? So we don't actually train our foundation models from scratch, right? The best thing about it is there's so many open source models that have been trained on the entire internet. So there are multi-model LLMs that can take audio, text, images, input, and they're trained to take a question as an input and like give you an answer. What we did is we fine-tuned these models. We took the best multi-model LLMs. There's"
+    },
+    {
+      "startedAt": "2026-04-20T20:46:35.440Z",
+      "endedAt": "2026-04-20T20:47:05.440Z",
+      "text": "from Microsoft, Google, all these companies, DeepSeek, all these companies have LLMs, and we fine-tune them to become a speech-to-text model. And your fine-tuning mechanism is the best, making the best speech-to-text. Now, so what we have done is we took an ensemble of the best multimodal LLMs in the world, and then we asked, we had our own curated dataset of a lot of like, you know, podcast, videos, YouTube, all of these things, where we have input as like audio and output as like text, but then we add the LLMs"
+    },
+    {
+      "startedAt": "2026-04-20T20:47:05.440Z",
+      "endedAt": "2026-04-20T20:47:35.440Z",
+      "text": "like converted from input to output and then we actually have another llm that goes and tries to fix all the errors and then that llm actually if if we have five different models that give five different transcripts then we ask the final llm to be the judge and like figure out what is the ground truth i see you can look at five different transcripts by five different models these are all llm models then we ask the final llm to correct it and find the true ground truth and then we also have some hand curated ground truth as well"
+    },
+    {
+      "startedAt": "2026-04-20T20:47:35.440Z",
+      "endedAt": "2026-04-20T20:48:05.440Z",
+      "text": "and then we use that as a gold standard to then train a multi-modal llm to go from speech to text whereas all these other companies are not using llms under the hood they have trained models 10 years ago to just go from speech to text that tiny model the llms are trained on the whole internet so they have heard every language in the world they have seen every video every audio podcast on the internet so now talking about the model you have created i want to know how did you create it and how it takes"
+    },
+    {
+      "startedAt": "2026-04-20T20:48:05.440Z",
+      "endedAt": "2026-04-20T20:48:35.440Z",
+      "text": "to create models because all I see is it requires a lot of money. How much money is needed to create something like the world's best speech-to-text model? So we don't actually train our foundation models from scratch, right? The best thing about it is there's so many open source models that have been trained on the entire internet. So there are multi-model LLMs that can take audio, text, image as input and they're trained to take a question as an input and like give you an answer. what we did is we fine-tuned these models we took the best"
+    },
+    {
+      "startedAt": "2026-04-20T20:48:35.440Z",
+      "endedAt": "2026-04-20T20:49:05.440Z",
+      "text": "multimodal LLMs, there's ones from Microsoft, Google, all these companies, DeepSeek, all these companies have LLMs and we fine-tune them to become a speech-to-text model. And your fine-tuning mechanism is the best, making the best speech-to-text. Now, so what we have done is we took an ensemble of the best multimodal LLMs in the world. And then we asked, we had our own curated data set of a lot of like, you know, podcast, videos, YouTube, all of these things, where we have input as like audio and output as like text. but then the,"
+    },
+    {
+      "startedAt": "2026-04-20T20:49:05.440Z",
+      "endedAt": "2026-04-20T20:49:35.440Z",
+      "text": "other LLMs to actually like convert it from input output and then we actually have another LLM that goes and tries to fix all the errors and then that LLM actually if if we have five different models that give five different transcript then we ask the final LLM to be the judge and like figure out what is the ground truth I see you can look at five different transcript by five different models these are all LLM"
+    }
+  ],
+  "suggestionBatches": [
+    {
+      "createdAt": "2026-04-20T20:47:07.826Z",
+      "suggestions": [
+        {
+          "type": "answer",
+          "title": "Cost estimate for top-tier speech-to-text model",
+          "preview": "Building a state‑of‑the‑art speech‑to‑text system from scratch typically exceeds $100 M (data licensing, compute clusters, research staff). Fine‑tuning an open‑source multi‑modal LLM can range from $0.5 M to $5 M depending on model size and training duration."
+        },
+        {
+          "type": "clarify",
+          "title": "Define \"world's best\" speech‑to‑text benchmark",
+          "preview": "Specify which metric you mean—e.g., lowest Word Error Rate on LibriSpeech test‑clean, or performance on multilingual benchmarks like CommonVoice. Different benchmarks yield different \"best\" rankings."
+        },
+        {
+          "type": "question",
+          "title": "Ask about compute resources needed for fine‑tuning",
+          "preview": "What GPU/TPU cluster size, memory, and total training hours are required to fine‑tune a multi‑modal LLM for high‑accuracy speech‑to‑text?"
+        }
+      ]
+    },
+    {
+      "createdAt": "2026-04-20T20:47:38.830Z",
+      "suggestions": [
+        {
+          "type": "answer",
+          "title": "Provide cost breakdown for fine‑tuning ensemble",
+          "preview": "Fine‑tuning a top‑tier speech‑to‑text ensemble typically costs $1‑2 M in cloud GPU hours (e.g., 200‑300 k GPU‑h on A100), plus $200‑300 k for data licensing and engineering, far less than the $10‑15 M needed to train from scratch."
+        },
+        {
+          "type": "clarify",
+          "title": "Clarify dataset volume and diversity",
+          "preview": "Ask how many total audio hours, languages, and domains (podcasts, YouTube, etc.) are in the curated dataset, and what proportion is hand‑curated ground truth versus automatically generated transcripts."
+        },
+        {
+          "type": "talking_point",
+          "title": "Highlight ensemble error‑reduction impact",
+          "preview": "Mention that using five independent models plus a final LLM judge can cut word‑error‑rate by 15‑25 % versus the best single model, based on internal validation on a held‑out test set."
+        }
+      ]
+    },
+    {
+      "createdAt": "2026-04-20T20:48:07.818Z",
+      "suggestions": [
+        {
+          "type": "answer",
+          "title": "Estimated budget for top‑tier speech‑to‑text ensemble",
+          "preview": "Building an ensemble of state‑of‑the‑art multimodal LLMs typically costs $5‑10 M: $2‑4 M for data acquisition/licensing, $2‑3 M for GPU compute (≈10k GPU‑hours), $1‑2 M for engineering and fine‑tuning, plus ongoing inference spend."
+        },
+        {
+          "type": "fact_check",
+          "title": "LLMs have been trained on every language and audio source?",
+          "preview": "Large multilingual models cover many languages (≈100+), but they are not trained on *all* audio/video content. Coverage is extensive yet incomplete; niche languages and proprietary audio may be under‑represented."
+        },
+        {
+          "type": "question",
+          "title": "What are the latency and throughput of the final ensemble model?",
+          "preview": "Ask the team to provide inference latency per second, GPU memory needs, and real‑time capability to gauge production feasibility and cost of serving the model."
+        }
+      ]
+    }
+  ],
+  "chat": []
+}

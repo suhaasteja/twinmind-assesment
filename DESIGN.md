@@ -50,7 +50,7 @@ flowchart LR
 
 **Why this shape**
 
-- Client owns session state — aligns with the spec ("no persistence on reload") and keeps the server stateless so it scales trivially.
+- Client owns session state — the server stays stateless so it scales trivially. History-bearing state (chunks, batches, chat, rolling summary) is persisted to `localStorage` so an accidental reload doesn't wipe an in-progress meeting; the transcript column's **Clear** button is the explicit reset.
 - API routes proxy Groq rather than letting the browser call Groq directly. This keeps the API key out of CORS and lets us post-process (JSON validation, SSE → text) server-side.
 - Every 30-second suggestion request is independent. No "job", no "session id" — just the current transcript window plus recent titles to avoid repetition.
 
@@ -66,7 +66,7 @@ flowchart LR
 | **Chat column** | `app/src/components/ChatColumn.tsx` | Two code paths: (a) free-form user input uses `chatPrompt`, (b) suggestion-click uses `detailedAnswerPrompt` + wider context. Both stream tokens into a growing assistant message. |
 | **Settings dialog** | `app/src/components/SettingsDialog.tsx` | Edits API key, models, prompts, and context windows. Persists to `localStorage` via `zustand/middleware/persist`. |
 | **UI primitives** | `app/src/components/ui.tsx` | `Panel`, `Button`, `TypeChip`, `StatusDot` — shared look. |
-| **State** | `app/src/lib/store.ts` | Two stores: `useSettings` (persisted) and `useSession` (in-memory only). |
+| **State** | `app/src/lib/store.ts` | Two stores, both persisted to `localStorage`: `useSettings` (all fields) and `useSession` (history-bearing fields via `partialize`; transient flags reset on reload). |
 | **Prompts** | `app/src/lib/prompts.ts` | All three default prompts. Editable at runtime. |
 | **Groq wrappers** | `app/src/lib/groq.ts` | Thin `fetch` helpers for `/chat/completions` and `/audio/transcriptions`. Reads the per-request `x-groq-key` header. |
 | **Export** | `app/src/lib/export.ts` | Builds the session JSON with ISO timestamps. |
@@ -176,18 +176,20 @@ Nothing is persisted server-side. Everything lives in the browser, split across 
 ```mermaid
 flowchart TB
   subgraph LS["localStorage (persisted)"]
-    Settings["useSettings<br/>• apiKey<br/>• prompts x3<br/>• context windows<br/>• chunk / refresh seconds<br/>• model names"]
+    Settings["useSettings (all fields)<br/>• apiKey / tavilyKey<br/>• prompts x3<br/>• context windows<br/>• chunk / refresh seconds<br/>• model names / meeting kind / cadence knobs"]
+    SessionPersist["useSession (partialize)<br/>• sessionStartedAt<br/>• chunks[]<br/>• batches[]<br/>• chat[]<br/>• meetingSummary"]
   end
-  subgraph Mem["in-memory only (cleared on reload)"]
-    Session["useSession<br/>• recording<br/>• chunks[]<br/>• batches[]<br/>• chat[]<br/>• loading flags"]
+  subgraph Mem["transient (reset on reload)"]
+    Transient["recording / mockActive<br/>loadingSuggestions / chatStreaming<br/>inflightTranscribes<br/>transcribeErrorStreak<br/>autoRefreshPaused"]
   end
   Settings -.read.-> A["Transcript / Suggest / Chat calls"]
-  Session -.read/write.-> A
+  SessionPersist -.read/write.-> A
+  Transient -.read/write.-> A
 ```
 
-**Settings** use `zustand/middleware/persist` under the key `twinmind.settings.v1`. Only settings persist. This is what you want — the API key shouldn't be re-entered on every reload, but meeting content shouldn't leak across sessions.
+**Settings** persist under `twinmind.settings.v1` — the API key, Tavily key, prompts, and all user-tunable knobs. Re-entering on every reload would be painful.
 
-**Session** is a plain Zustand store. It holds three arrays (`chunks`, `batches`, `chat`) and a couple of flags. It does not persist; reloading the page wipes it, which matches the spec.
+**Session** persists under `twinmind.session.v1` via `partialize` — only the **history-bearing** fields (`sessionStartedAt`, `chunks`, `batches`, `chat`, `meetingSummary`). Transient flags (recording, in-flight counters, circuit-breaker streak) are deliberately excluded so they always start fresh. Use the transcript column's **Clear** button to wipe the persisted session.
 
 ### Why no cache is needed for the 30s toggle
 
@@ -283,7 +285,7 @@ The single `/api/chat` endpoint handles both typed-chat and detailed-answer path
 
 A second **"▶ Play mock"** button in the transcript column streams a hand-written scenario into `useSession.chunks` at the same cadence a real meeting would produce. No mic, no Whisper call.
 
-- Scenarios live in `src/lib/mockTranscripts.ts` (currently three: infra scaling, product kickoff, 1:1).
+- Scenarios live in `src/lib/mockTranscripts.ts` (currently: TwinMind founder podcast, product kickoff, 1:1).
 - Playback is driven by `src/lib/mockPlayer.ts`, which packs lines into ~`chunkSeconds` chunks and `setTimeout`s each one at `chunkSeconds * 1000 / mockSpeed` ms.
 - `useSession.mockActive` is a separate flag from `recording`. The suggestion loop now gates on `recording || mockActive`, so everything downstream (auto-refresh, chat, export) exercises identically to a real session.
 - `mockSpeed` (1× / 2× / 5× / 10×) lets you compress a ~3-minute script into ~18s for fast iteration.
@@ -292,7 +294,7 @@ A second **"▶ Play mock"** button in the transcript column streams a hand-writ
 
 ## 10. What would change with a real backend
 
-For the assignment this is deliberately overkill, but the natural path if you wanted multi-device / resumable sessions:
+Overkill for a single-device browser copilot, but the natural path if you wanted multi-device / resumable sessions:
 
 - Add `sessionId` (uuid) created on first mic click.
 - `/api/transcribe` → also `INSERT` the chunk into Postgres keyed by `sessionId`.

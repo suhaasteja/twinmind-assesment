@@ -92,9 +92,9 @@ MediaRecorder #1 stop  → ondataavailable + onstop → Blob(parts, webm/opus)
 ### Triggers (all call the same `refresh()` in `SuggestionsColumn.tsx:47`)
 | Trigger | Source | Bypasses gates? |
 |---|---|---|
-| `auto` | 1 s countdown interval (`:170-186`) | No |
-| `manual` | Reload button (`:224`) | Bypasses D1, D2, E1, cooldown (not `loadingSuggestions`) |
-| `interrupt` | New chunk matches `endsWithQuestion` (`:192-202`) | No |
+| `auto` | 1 s countdown interval | No |
+| `manual` | Reload button | Bypasses D1, D2, E1, cooldown (not `loadingSuggestions`) |
+| `interrupt` | New chunk matches `endsWithQuestion`, `containsDecisionPhrase`, or `containsNamedClaim` | No (cooldown still caps cost) |
 
 ### Gate order (inside `refresh`)
 ```
@@ -114,10 +114,11 @@ MediaRecorder #1 stop  → ondataavailable + onstop → Blob(parts, webm/opus)
 - Validates key.
 - If transcript < 20 chars → `{ suggestions: [] }` (short-circuit, no Groq).
 - Builds user message combining:
-  - optional `meetingSummary` (future rolling summary; not yet generated),
+  - optional `meetingSummary` (rolling summary, regenerated client-side every ~6 chunks — see §6),
   - recent transcript,
   - previous batch titles to avoid repetition,
   - a "return exactly 3" instruction.
+- Parser is permissive on `needsWebSearch`: accepts boolean truthy values; force-ons the flag for every `fact_check` and `clarify` card so the UI can offer a web-search chip regardless of what the model emits.
 - Calls Groq chat completion with `response_format: json_object`,
   `temperature: 0.4`, `max_tokens: 700`.
 - Parses JSON. Filters entries missing `title`/`preview`/`type`. Coerces
@@ -148,6 +149,7 @@ function:
 |---|---|---|---|
 | Free-form chat | `settings.chatPrompt` | `settings.detailedContextMinutes` (0 = full) | typed input → `send(v)` |
 | Suggestion click | `settings.detailedAnswerPrompt` | same | `sendFromSuggestion(s)` imperative handle |
+| Suggestion click (flagged) | `detailedAnswerPrompt` + `WEB SEARCH RESULTS:` block from Tavily | same | same handle; runs a Tavily fetch before the Groq call |
 
 ### Client (`src/components/ChatColumn.tsx`)
 - `send()` (`:45-127`):
@@ -241,30 +243,69 @@ Proposed in `ADAPTIVE_CADENCE.md`; implemented in
 `src/components/SuggestionsColumn.tsx` + `src/lib/signals.ts` +
 `src/lib/store.ts`. Summary of what is live today:
 
-| Label | What | Enforced at | Bypassed by manual? |
-|---|---|---|---|
-| Cooldown | `minRefreshIntervalMs` between any two suggests | `SuggestionsColumn.tsx:117-121` | yes |
-| **B1** question interrupt | On new chunk matching `endsWithQuestion`, fire `refresh("interrupt")` | `:192-202` | n/a (cooldown still caps cost) |
-| **D1** in-flight defer | Wait up to `inflightDeferMs` for latest chunk to land | `:78-92` | yes |
-| **D2** circuit breaker | After `transcribeErrorCircuitBreaker` consecutive transcribe errors, pause auto-refresh | `:60-72`, resume via `resetTranscribeErrors` or successful transcribe (`store.ts:141-149`) | yes (manual probes recovery) |
-| **E1** dedup skip | Skip if `jaccard(window, lastSentWindow) > dedupJaccardThreshold`; show "no new context" notice | `:107-115` | yes |
+| Label | What | Bypassed by manual? |
+|---|---|---|
+| Cooldown | `minRefreshIntervalMs` between any two suggests | yes |
+| **B1** question interrupt | Fire `refresh("interrupt")` on a new chunk matching `endsWithQuestion` | n/a (cooldown still caps cost) |
+| **B2** decision interrupt | Same path, triggered by `containsDecisionPhrase` ("let's go with", "we'll ship", etc.) | n/a |
+| **B4** named-claim interrupt | Same path, triggered by `containsNamedClaim` (number+unit, multi-word proper noun, acronym) | n/a |
+| **B5** rolling summary | After every `SUMMARIZE_EVERY_CHUNKS` (default 6), regenerate a ≤200-word summary via `/api/chat` and inject as `meetingSummary` on the next suggest call | yes (manual refresh uses the current summary) |
+| **D1** in-flight defer | Wait up to `inflightDeferMs` for latest chunk to land | yes |
+| **D2** circuit breaker | After `transcribeErrorCircuitBreaker` consecutive transcribe errors, pause auto-refresh; resume via `resetTranscribeErrors` or next successful transcribe | yes (manual probes recovery) |
+| **E1** dedup skip | Skip if `jaccard(window, lastSentWindow) > dedupJaccardThreshold`; show "no new context" notice | yes |
 
 ### Pure helpers (`src/lib/signals.ts`)
 - `jaccard(a, b)` — token-bag similarity; both empty returns 1.
 - `endsWithQuestion(text)` — `?` suffix OR last sentence starts with an
   interrogative opener.
+- `containsDecisionPhrase(text)` — regex union over commitment phrases.
+- `containsNamedClaim(text)` — number+unit, multi-word proper noun, or
+  acronym; conservative to reduce false positives.
 - `buildWindow(chunks, minutes, now)` — filters chunks with
   `endedAt >= now - minutes*60_000`; returns `{ text, lastChunkEndedAt }`.
 
 ### Unit-tested
-`src/lib/signals.test.ts` — covers jaccard bounds, question detection, and
-window slicing.
+`src/lib/signals.test.ts` — jaccard bounds, question / decision / named-claim
+detection, window slicing. `src/lib/prompts.test.ts` — meeting-kind prompt
+composition.
 
 ### Not yet implemented (see `ADAPTIVE_CADENCE.md §3`)
 - A1 silence pause, A2 hot mode, A3 crosstalk hint, A4 shorter chunks,
-  B2 decision triggers, B3 window shrink on topic shift, B4 numbers/names
-  prompt hint, B5 rolling summary, C2 wrap-up, C3 role hint, D3 burst
+  B3 window shrink on topic shift, C2 wrap-up, C3 role hint, D3 burst
   debounce, E1 UI "no-new-context for N ticks" indicator.
+
+---
+
+## 6b. Click-time web search (optional)
+
+Lives entirely in the chat column and a single route; trivially removable.
+
+### Flow
+```
+user clicks a card with needsWebSearch=true
+  → ChatColumn.sendFromSuggestion(card)
+      push user message (the card header)
+      push empty assistant message, temporarily set content to "🔎 Searching the web…"
+      → POST /api/websearch { query }          # src/app/api/websearch/route.ts
+          forwards to Tavily; returns top-5 { title, url, snippet } + summary
+      → attach sources to the assistant message (setChatMessageSources)
+      → POST /api/chat with systemPrompt + "WEB SEARCH RESULTS:" block appended
+      stream replaces the placeholder content with the answer
+```
+
+### Gates
+- Chip render is gated on `settings.tavilyKey` being non-empty (or the
+  server `TAVILY_API_KEY` env var being set — the chip component only sees
+  the client key, so env-var-only setups hide the chip but the flow still
+  works if the user clicks a free-form message).
+- `/api/websearch` degrades gracefully: missing key → empty results array +
+  an explanatory summary string; the chat call proceeds without grounding.
+
+### Invariants
+- Web search never runs from `/api/suggest`. Flagging is advisory; the
+  expensive call happens only on user intent.
+- Sources are persisted on the `ChatMessage` via `sources?: WebSearchSource[]`
+  and included in the export JSON.
 
 ---
 

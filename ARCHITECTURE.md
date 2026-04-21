@@ -70,33 +70,36 @@ No backend database. No Redis. No auth.
 │   │   ├── globals.css             # dark-theme tokens
 │   │   └── api/
 │   │       ├── transcribe/route.ts # Groq Whisper proxy
-│   │       ├── suggest/route.ts    # Groq JSON-mode suggestions
-│   │       └── chat/route.ts       # Groq SSE → plain-text stream
+│   │       ├── suggest/route.ts    # Groq JSON-mode suggestions (+ needsWebSearch parser)
+│   │       ├── chat/route.ts       # Groq SSE → plain-text stream
+│   │       └── websearch/route.ts  # Tavily proxy (optional; no-key graceful fallback)
 │   ├── components/
-│   │   ├── TranscriptColumn.tsx    # mic + mock + upload loop
-│   │   ├── SuggestionsColumn.tsx   # countdown + refresh + adaptive gates
-│   │   ├── ChatColumn.tsx          # streaming chat + suggestion handler
-│   │   ├── SettingsDialog.tsx      # all user-editable settings
+│   │   ├── TranscriptColumn.tsx    # mic + mock + upload + Clear
+│   │   ├── SuggestionsColumn.tsx   # countdown + refresh + adaptive gates + rolling summary
+│   │   ├── ChatColumn.tsx          # streaming chat + suggestion handler + web-search branch
+│   │   ├── SettingsDialog.tsx      # all user-editable settings (incl. Tavily key, meeting kind)
+│   │   ├── WebSearchChip.tsx       # "click to web-search" chip for flagged cards
 │   │   ├── ui.tsx                  # Panel/Button/TypeChip/StatusDot
 │   │   └── SuggestionsColumn.test.tsx
 │   └── lib/
 │       ├── store.ts                # Zustand: useSettings + useSession
 │       ├── types.ts                # canonical data shapes
-│       ├── prompts.ts              # default prompts (editable in UI)
+│       ├── prompts.ts              # default prompts + meeting-kind hints
+│       ├── prompts.test.ts
 │       ├── groq.ts                 # thin Groq fetch wrappers
 │       ├── audio.ts                # MediaRecorder chunker
 │       ├── mockPlayer.ts           # scripted transcript playback
-│       ├── mockTranscripts.ts      # demo scenarios
-│       ├── signals.ts              # pure helpers: jaccard, question regex, buildWindow
+│       ├── mockTranscripts.ts      # demo scenarios (podcast / kickoff / 1:1)
+│       ├── signals.ts              # pure helpers: jaccard, question/decision/named-claim, buildWindow
 │       ├── signals.test.ts
+│       ├── websearch.ts            # Tavily client + WEB SEARCH RESULTS formatter
 │       ├── export.ts               # session → JSON
 │       └── utils.ts                # cn, formatTime, formatClock, uid
 ├── DESIGN.md                       # prose design + mermaid
-├── ADAPTIVE_CADENCE.md             # adaptive refresh proposals
+├── ADAPTIVE_CADENCE.md             # adaptive refresh scenarios
 ├── ARCHITECTURE.md                 # this file — map
 ├── SYSTEM_DESIGN.md                # subsystem contracts
-├── assignment.md                   # spec
-└── README.md                       # setup + tradeoffs
+└── README.md                       # setup + feature overview
 ```
 
 ---
@@ -106,13 +109,17 @@ No backend database. No Redis. No auth.
 ```ts
 // src/lib/types.ts
 type SuggestionType = "question" | "talking_point" | "answer" | "fact_check" | "clarify";
+type MeetingKind   = "general" | "lecture" | "one_on_one" | "pitch" | "standup" | "interview";
 
-interface Suggestion       { id; type: SuggestionType; title; preview; }
+interface Suggestion       { id; type: SuggestionType; title; preview; needsWebSearch?: boolean; }
 interface SuggestionBatch  { id; createdAt: number; suggestions: Suggestion[]; }  // length ALWAYS 0 or 3
 interface TranscriptChunk  { id; startedAt: number; endedAt: number; text; }
-interface ChatMessage      { id; role: "user"|"assistant"|"system"; content; createdAt; fromSuggestion?; }
-interface Settings         { apiKey; 3 prompts; 2 context windows; autoRefreshSeconds;
-                             chunkSeconds; sttModel; llmModel; mockSpeed; mockScenarioId;
+interface WebSearchSource  { title; url; snippet?; }
+interface ChatMessage      { id; role: "user"|"assistant"|"system"; content; createdAt;
+                             fromSuggestion?; sources?: WebSearchSource[]; }
+interface Settings         { apiKey; tavilyKey; 3 prompts; 2 context windows;
+                             autoRefreshSeconds; chunkSeconds; sttModel; llmModel;
+                             mockSpeed; mockScenarioId; meetingKind;
                              minRefreshIntervalMs; inflightDeferMs;
                              dedupJaccardThreshold; transcribeErrorCircuitBreaker; }
 ```
@@ -134,12 +141,14 @@ Two Zustand stores, both in `src/lib/store.ts`.
 
 ### 6b. `useSession` — partially persisted
 - Storage key: `twinmind.session.v1` (localStorage).
-- `partialize` (`store.ts:172-177`) persists ONLY `sessionStartedAt`,
-  `chunks`, `batches`, `chat`.
+- `partialize` (`store.ts:207-213`) persists ONLY `sessionStartedAt`,
+  `chunks`, `batches`, `chat`, `meetingSummary`.
 - Transient fields (`recording`, `mockActive`, `loadingSuggestions`,
   `chatStreaming`, `inflightTranscribes`, `transcribeErrorStreak`,
-  `autoRefreshPaused`) are **intentionally not persisted** — they must
-  start fresh on reload. Do not add to `partialize` without reason.
+  `autoRefreshPaused`, `lastSummarizedChunkCount`) are **intentionally not
+  persisted** — they must start fresh on reload. Do not add to `partialize`
+  without reason. The transcript column's **Clear** button is the
+  authoritative user-facing reset.
 
 **Contract for new fields:**
 - History-bearing (user cares across reloads) → add to `partialize`.
@@ -268,8 +277,8 @@ path, and the 30 s loop do not change.
 - **No auth.** The API key is user-owned and per-request.
 - **No diarization.** See `ADAPTIVE_CADENCE.md §7`.
 - **No streaming STT.** Groq Whisper is request/response.
-- **No rolling summary yet.** Hook is wired (`meetingSummary` param in
-  `suggest/route.ts:13,39`) but not generated.
+- **Web search is optional.** If no Tavily key is configured, the web-search
+  chip is hidden and the app runs identically to a Tavily-less build.
 
 ---
 

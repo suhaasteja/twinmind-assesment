@@ -15,13 +15,27 @@ most valuable extensions. Citations in `[mm:ss]` point into the transcript.
 persistent memory layer across weeks/months of a user's life, with
 integrations that both read context from the browser and write back into it.
 
-**This app (the assignment)** = a 3-column browser prototype that listens,
-transcribes in 30 s chunks via Groq Whisper, and surfaces 3 typed suggestion
-cards + a streamed detailed answer on click. Session-only. No cross-session
-memory, no integrations, no proactive OS-level presence.
+**This app** = a 3-column browser prototype that listens, transcribes in 30 s
+chunks via Groq Whisper, and surfaces 3 typed suggestion cards + a streamed
+detailed answer on click — with optional click-time web grounding via Tavily.
+Session-only (history persists across reloads but not across devices). No
+cross-session memory, no integrations, no proactive OS-level presence.
 
-The assignment is a **faithful miniature** of TwinMind's *live-suggestions
-surface*, not a miniature of the full product.
+This is a **faithful miniature** of TwinMind's *live-suggestions surface*,
+not a miniature of the full product.
+
+### Status update (implemented since v0)
+
+The items below originally sat in Priority A – C; they are all **live** now:
+
+- **Rolling meeting summary** (Priority A #3) — regenerates every ~6 chunks,
+  fed into `/api/suggest` as `meetingSummary`.
+- **B2 / B4 interrupt triggers** (Priority A #4) — `containsDecisionPhrase`
+  and `containsNamedClaim` in `signals.ts` fire off-cycle refreshes.
+- **Per-meeting-kind presets** (Priority B #6) — six kinds in Settings,
+  appended as hints via `buildSuggestionsPrompt()`.
+- **Click-time web search** (Priority C #9) — Tavily proxy, chip on flagged
+  cards, sources footer in chat, preserved in export.
 
 ---
 
@@ -33,28 +47,27 @@ surface*, not a miniature of the full product.
 | Batch CPU/GPU bursts, not continuous compute `[06:58–07:25]` | `MediaRecorder` stop/restart per chunk; low-energy between bursts | `src/lib/audio.ts:31-57` |
 | Intent-prediction model that decides **what** to show **when** `[04:31–04:55]` | Suggestions prompt with explicit timing rules + 5 typed cards + adaptive gates (B1 question interrupt, D1/D2/E1) | `src/lib/prompts.ts:4-30`, `src/components/SuggestionsColumn.tsx:47-210` |
 | Proactive, not reactive `[06:11–06:14]` | Auto-refresh loop fires without user input; interrupt trigger on `?` | `SuggestionsColumn.tsx:170-202` |
-| Multi-step reasoning: transcript vs. web vs. model memory `[08:40–09:02]` | Partial: transcript + model memory. No web search yet. | `src/app/api/chat/route.ts` |
+| Multi-step reasoning: transcript vs. web vs. model memory `[08:40–09:02]` | Transcript + model memory + click-time Tavily web search on flagged cards | `src/app/api/chat/route.ts`, `src/app/api/websearch/route.ts` |
 | Action items & follow-up drafts from a meeting `[08:12–08:17, 18:19–18:38]` | Covered indirectly: "answer"/"talking_point" types + detailed-answer chat | `src/lib/prompts.ts:32-43` |
-| Instant value before long-term memory kicks in `[07:41–07:53]` (phase 1) | This is exactly the assignment scope | all of it |
+| Instant value before long-term memory kicks in `[07:41–07:53]` (phase 1) | This is exactly what the prototype covers | all of it |
 | User owns API key / control `[25:47–25:58]` | Key lives in `localStorage`, sent per request as `x-groq-key`, never server-side | `src/lib/groq.ts:7-10`, `src/lib/store.ts:46-67` |
 | 100-language STT `[04:07–04:08]` | `whisper-large-v3` via Groq supports multilingual | `src/lib/groq.ts:28-44` |
 | Shareable meeting summary `[18:45–19:30]` | Export button outputs full session JSON | `src/lib/export.ts` |
 
-**Net:** the assignment nails the **live-suggestions + detailed-answer**
-surface and the **proactive-not-reactive** framing. That's the one-slice
-MVP Daniel calls "phase 1" in `[07:41–08:17]`.
+**Net:** the app nails the **live-suggestions + detailed-answer** surface
+and the **proactive-not-reactive** framing. That's the one-slice MVP
+Daniel calls "phase 1" in `[07:41–08:17]`.
 
 ---
 
 ## 3. What the product has that this app deliberately does not
 
-These are out of scope for the assignment (single-page browser app, no
-backend, session-only per spec), but worth noting so the gap is explicit:
+These are out of scope for a single-page browser app with no backend, but worth noting so the gap is explicit:
 
 | Product feature | Podcast ref | Why not in this app |
 |---|---|---|
 | On-device STT on Apple Silicon | `[03:49–04:18]` | Browser can't match mobile NE/GPU; Groq Whisper is the right proxy |
-| Persistent multi-day/month memory | `[09:41–10:12, 17:52–18:10]` | Spec says no persistence on reload |
+| Persistent multi-day/month memory | `[09:41–10:12, 17:52–18:10]` | Cross-device / cross-session memory requires a backend; intentionally out of scope |
 | Memory API exposed to third-party apps (Netflix, YouTube, etc.) | `[23:08–24:17]` | Out of scope |
 | Chrome extension that ingests tabs & writes back to Gmail/Notion | `[11:42–12:10, 22:03–22:45]` | Out of scope |
 | Photos / files / whiteboard photos as memory inputs | `[21:15–21:45]` | Out of scope |
@@ -62,7 +75,7 @@ backend, session-only per spec), but worth noting so the gap is explicit:
 | Shared meeting summaries with viral landing page | `[19:20–19:55]` | Out of scope |
 | Deep Memory Search = web search + personal history | `[15:40–16:10]` | Needs persistent memory + web tool |
 
-Nothing on this list is a *gap in the assignment*. They are product roadmap,
+Nothing on this list is a *gap in the prototype*. They are product roadmap,
 not missing requirements.
 
 ---
@@ -195,12 +208,12 @@ Phrases worth borrowing into `DEFAULT_SUGGESTIONS_PROMPT` /
 
 ## 7. Summary
 
-- **Scope-match:** the assignment is a tight, honest slice of TwinMind's
+- **Scope-match:** the app is a tight, honest slice of TwinMind's
   live-suggestions surface. Architecture and tradeoffs align with the
   founder's descriptions wherever they overlap.
-- **Scope-gap (by design):** persistent memory, integrations, proactive
-  OS presence, memory API — all out of the assignment and should stay
-  out.
+- **Scope-gap (by design):** persistent cross-device memory, integrations,
+  proactive OS presence, memory API — out of scope for a browser
+  prototype.
 - **Biggest in-scope wins:** rolling summary (B5), intent-label the
   prompt, action-items tab, B2/B4 interrupt triggers, per-meeting-kind
   prompts. Everything in §4 Priority A is ≤ half a day of work and

@@ -113,4 +113,5 @@ Any Node host. Tested on Vercel (`npx vercel`). Build with `npm run build && npm
 
 - `ARCHITECTURE.md` — component + data-flow diagrams.
 - `ADAPTIVE_CADENCE.md` — refresh-cadence scenarios and tuning.
-- `DESIGN.md`, `PRODUCT_ALIGNMENT.md`, `FUTURE_WORK.md` — design journal.
+- `SYSTEM_DESIGN.md` — subsystem contracts (audio, suggest loop, chat, web search, state).
+- `DESIGN.md`, `PRODUCT_ALIGNMENT.md` — design journal.
