@@ -6,6 +6,7 @@ import { useSession, useSettings } from "@/lib/store";
 import { ChatMessage, Suggestion } from "@/lib/types";
 import { formatClock, uid } from "@/lib/utils";
 import { InfoCard, Panel, PanelHeader, TypeChip } from "./ui";
+import { Markdown } from "./Markdown";
 import { runWebSearch, formatSearchForPrompt } from "@/lib/websearch";
 
 export interface ChatColumnHandle {
@@ -225,18 +226,20 @@ export function ChatColumn({
                 </span>
               </div>
             )}
-            <div
-              className={
-                m.role === "user"
-                  ? "rounded-lg border bg-[var(--panel-2)] px-3 py-2 text-[14px] leading-relaxed"
-                  : "whitespace-pre-wrap text-[14px] leading-relaxed text-[var(--fg)]"
-              }
-              style={
-                m.role === "user" ? { borderColor: "var(--border)" } : undefined
-              }
-            >
-              {m.content || (m.role === "assistant" && streaming ? "…" : "")}
-            </div>
+            {m.role === "user" ? (
+              <div
+                className="whitespace-pre-wrap rounded-lg border bg-[var(--panel-2)] px-3 py-2 text-[14px] leading-relaxed"
+                style={{ borderColor: "var(--border)" }}
+              >
+                {m.content}
+              </div>
+            ) : m.content ? (
+              <Markdown>{m.content}</Markdown>
+            ) : (
+              <div className="text-[14px] leading-relaxed text-[var(--muted-2)]">
+                {streaming ? "…" : ""}
+              </div>
+            )}
             {m.role === "assistant" && m.sources && m.sources.length > 0 && (
               <div
                 className="mt-2 rounded-md border px-3 py-2 text-[11px] leading-relaxed"
