@@ -61,6 +61,94 @@ If the key isn't set, the chip is hidden and suggestions still work (just withou
 - **Parallel transcription** — each chunk uploads independently so the UI never blocks.
 - **Editable prompts** — all three system prompts live in `src/lib/prompts.ts` and are editable in Settings with a Reset button.
 
+## Prompt architecture
+
+### Context hierarchy
+
+The model sees context in this priority order:
+
+1. **System prompt** (`suggestions`, `detailed_answer`, `summary`, or `chat`) — sets role, rules, output format
+2. **Meeting summary** — rolling ≤200-word compression of older context, fed only to `/api/suggest` as "MEETING SO FAR (background only)"
+3. **Transcript** — wrapped in `<transcript>` XML tags; suggestions see last N minutes (default 3), chat sees full history or trimmed tail
+4. **Web search results** — injected as `WEB SEARCH RESULTS:` block into detailed-answer system prompt (not a separate user turn, so the model treats it as authoritative)
+5. **Chat history** — prior user/assistant turns for conversational continuity
+6. **User message** — the triggering suggestion `[type] title\n\nPreview: ...` or free-form question
+
+### Card type logic
+
+The suggestions prompt enforces a 5-type taxonomy:
+
+- **`question`** — sharp question the user should ask next (never web-search flagged)
+- **`talking_point`** — concrete point to bring up (never flagged)
+- **`answer`** — direct response to a question just asked in the meeting (flagged only if time-sensitive/external data needed)
+- **`fact_check`** — verify/correct a claim (ALWAYS flagged for web search)
+- **`clarify`** — supply missing context (ALWAYS flagged)
+
+**Forced answer rule**: If the most recent transcript line contains an unanswered question, at least one of the 3 cards MUST be type `answer`.
+
+**Recency anchor**: Transcript lines are ISO-timestamped (YYYY-MM-DD HH:MM:SS, 24hr) with the final line marked `← MOST RECENT`. The prompt explicitly instructs anchoring on this line — if the topic shifted, old topics are history.
+
+### Anti-fabrication guardrails
+
+- **No invented numbers**: Specific values (dollar amounts, percentages, dates, ranges) must be either verifiably known from training or omitted entirely — the card flags for web search instead of guessing.
+- **No fake provenance**: Phrases like "studies show" or "per benchmarks" are banned unless actually stated in the transcript.
+- **Teaser-free previews**: Every preview must deliver standalone value — never "click to find out".
+
+### Rolling summary mechanism
+
+Every 6 chunks (~3 min), a background `/api/chat` call produces an updated summary using `DEFAULT_SUMMARY_PROMPT`. The result is stored and fed into subsequent suggestion calls as `meetingSummary`, giving the suggest model long-term memory even though the live transcript window stays small for freshness.
+
+### Detailed answer structure
+
+When a suggestion is tapped, the detailed-answer prompt requires:
+1. **FIRST**: One sentence explaining WHY this suggestion was surfaced — citing the specific transcript moment or web result that triggered it
+2. **SECOND**: The answer/recommendation in a standalone first sentence
+3. **Then**: 2–5 tight bullets with specifics
+
+## Tradeoffs & constraints
+
+### 30-second chunking vs streaming
+
+**Tradeoff**: We stop/restart `MediaRecorder` every ~30s rather than stream continuously.
+- **Pro**: Each chunk is a complete, Whisper-decodable webm/opus file that can upload in parallel without blocking the UI
+- **Con**: 30s latency between speech and first transcript appearance (vs real-time streaming STT)
+- **Mitigation**: Chunk duration is configurable in Settings (as low as 5s, though this increases API cost)
+
+### JSON mode for suggestions (no streaming)
+
+**Tradeoff**: Suggestions use Groq's `json_schema` strict mode for structured output.
+- **Pro**: Guaranteed parseable, type-safe cards; Zod validation + salvage fallback means the UI never breaks on malformed model output
+- **Con**: No streaming — the user waits for all 3 cards to appear at once
+- **Mitigation**: Chat uses SSE streaming for a snappy feel; suggestions are small JSON (~1KB) so latency is acceptable
+
+### Full transcript for chat, trimmed for summary
+
+**Tradeoff**: Chat sees untrimmed transcript; summary generation uses `trimTranscriptForPrompt()` at 350k chars (~87k tokens).
+- **Pro**: Chat answers can reference any prior moment; summary generation won't blow context windows on marathon 6+ hour sessions
+- **Con**: Very long meetings eventually truncate even for chat (rare edge case)
+- **Mitigation**: The 350k limit allows ~5–6 hours of typical speech before truncation; rolling summary preserves older context for suggestions
+
+### Web search on-click (not auto)
+
+**Tradeoff**: We search only when the user clicks a flagged card, not preemptively.
+- **Pro**: Cost control — no wasted searches for cards the user ignores; fresh results at click-time
+- **Con**: ~1–2s delay on first click while Tavily fetches
+- **Mitigation**: Results are cached implicitly by streaming the answer immediately after; no persistent cache to avoid stale data
+
+### No live transcript display
+
+**Tradeoff**: The transcript UI shows finalized chunks only, no live partial ASR.
+- **Pro**: Battery life — continuous DOM updates and Whisper polling would drain mobile devices
+- **Con**: Users can't see words appear as they speak
+- **Mitigation**: Auto-scroll keeps the view anchored on latest; each chunk has a clear timestamp so the cadence is predictable
+
+### Single-session, no login
+
+**Tradeoff**: Everything lives in `localStorage` + Zustand; no backend persistence.
+- **Pro**: Zero auth friction; privacy by default — no transcript leaves the browser except to Groq/Tavily
+- **Con**: Lost on hard refresh if user hasn't exported; no cross-device sync
+- **Mitigation**: Export button produces ISO-timestamped JSON of full session (transcript, suggestions, chat, sources)
+
 ## Stack
 
 - **Next.js 14** (App Router) + **TypeScript** — single deploy; API routes proxy all third-party calls so keys never hit CORS.
