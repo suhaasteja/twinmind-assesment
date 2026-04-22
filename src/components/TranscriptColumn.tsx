@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Mic, Square, Play, Trash2 } from "lucide-react";
 import { useSession, useSettings } from "@/lib/store";
 import { startChunkRecorder, ChunkRecorderHandle } from "@/lib/audio";
-import { startMockPlayback, MockPlayerHandle } from "@/lib/mockPlayer";
-import { getScenario, MOCK_SCENARIOS } from "@/lib/mockTranscripts";
+// import { startMockPlayback, MockPlayerHandle } from "@/lib/mockPlayer";
+// import { getScenario, MOCK_SCENARIOS } from "@/lib/mockTranscripts";
 import { formatClock, uid } from "@/lib/utils";
 import { InfoCard, Panel, PanelHeader, StatusDot } from "./ui";
 
@@ -27,7 +27,7 @@ export function TranscriptColumn() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(0);
   const micHandleRef = useRef<ChunkRecorderHandle | null>(null);
-  const mockHandleRef = useRef<MockPlayerHandle | null>(null);
+  // const mockHandleRef = useRef<MockPlayerHandle | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to latest chunk.
@@ -87,16 +87,16 @@ export function TranscriptColumn() {
     }
   };
 
-  const stopMock = () => {
-    mockHandleRef.current?.stop();
-    mockHandleRef.current = null;
-    setMockActive(false);
-  };
+  // const stopMock = () => {
+  //   mockHandleRef.current?.stop();
+  //   mockHandleRef.current = null;
+  //   setMockActive(false);
+  // };
 
   const startMic = async () => {
     setError(null);
     resetTranscribeErrors();
-    if (mockActive) stopMock();
+    // if (mockActive) stopMock();
     if (!settings.apiKey) {
       setError("Paste your Groq API key in Settings first.");
       return;
@@ -122,8 +122,8 @@ export function TranscriptColumn() {
     setRecording(false);
   };
 
-  // ---- MOCK MODE ----
-
+  // ---- MOCK MODE (disabled — re-enable imports and uncomment to use) ----
+  /*
   const startMock = () => {
     setError(null);
     if (recording) void stopMic();
@@ -136,8 +136,6 @@ export function TranscriptColumn() {
         addChunk({ id: uid(), startedAt, endedAt, text });
       },
       onDone: () => {
-        // Playback reached the end of the script — stop the mock session
-        // so the suggestions loop pauses naturally.
         mockHandleRef.current = null;
         setMockActive(false);
       },
@@ -145,11 +143,12 @@ export function TranscriptColumn() {
     mockHandleRef.current = h;
     setMockActive(true);
   };
+  */
 
   // Stop everything on unmount.
   useEffect(() => {
     return () => {
-      mockHandleRef.current?.stop();
+      // mockHandleRef.current?.stop();
       void micHandleRef.current?.stop();
     };
   }, []);
@@ -186,9 +185,9 @@ export function TranscriptColumn() {
         </button>
 
         <button
-          onClick={mockActive ? stopMock : startMock}
+          onClick={() => {}}
+          disabled={true}
           aria-label={mockActive ? "Stop mock playback" : "Play mock scenario"}
-          disabled={recording}
           className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40"
           style={{
             background: mockActive ? "rgba(245,158,11,0.15)" : "var(--panel-2)",
@@ -201,7 +200,8 @@ export function TranscriptColumn() {
           {mockActive ? "Stop mock" : "Play mock"}
         </button>
 
-        <select
+        {/* Mock scenarios hidden — re-enable in TranscriptColumn.tsx to use demo transcripts */}
+        {/* <select
           value={settings.mockScenarioId}
           onChange={(e) => setSettings({ mockScenarioId: e.target.value })}
           disabled={mockActive || recording}
@@ -214,7 +214,7 @@ export function TranscriptColumn() {
               {s.title}
             </option>
           ))}
-        </select>
+        </select> */}
 
         <select
           value={settings.mockSpeed}
@@ -239,7 +239,7 @@ export function TranscriptColumn() {
             );
             if (!ok) return;
             if (recording) void micHandleRef.current?.stop();
-            if (mockActive) mockHandleRef.current?.stop();
+            // if (mockActive) mockHandleRef.current?.stop();
             clearSession();
             setError(null);
           }}
@@ -258,10 +258,10 @@ export function TranscriptColumn() {
         {recording
           ? `Listening… transcript updates every ${settings.chunkSeconds}s.`
           : mockActive
-          ? `Playing mock "${getScenario(settings.mockScenarioId).title}" at ${settings.mockSpeed}×.`
+          ? `Mock mode disabled.`
           : chunks.length === 0
-          ? "Click the mic to start, or Play mock for a demo."
-          : "Stopped. Click mic or Play mock to resume."}
+          ? "Click the mic to start."
+          : "Stopped. Click mic to resume."}
         {pending > 0 && (
           <span className="ml-2 text-[11px] text-[var(--muted-2)]">
             transcribing {pending}…
@@ -271,8 +271,7 @@ export function TranscriptColumn() {
 
       <InfoCard>
         The transcript scrolls and appends new chunks every ~{settings.chunkSeconds} seconds while
-        recording. <b>Play mock</b> streams a pre-written meeting into the session at the same
-        cadence — useful for testing without a mic. Use Export (top bar) to pull the full session.
+        recording. Use Export (top bar) to pull the full session.
       </InfoCard>
 
       {error && (
