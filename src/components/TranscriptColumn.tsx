@@ -184,6 +184,7 @@ export function TranscriptColumn() {
           {recording ? <Square size={16} fill="currentColor" /> : <Mic size={18} />}
         </button>
 
+        {/* Play mock button hidden — re-enable with mock imports to use demo transcripts
         <button
           onClick={() => {}}
           disabled={true}
@@ -199,6 +200,7 @@ export function TranscriptColumn() {
           {mockActive ? <Square size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" />}
           {mockActive ? "Stop mock" : "Play mock"}
         </button>
+        */}
 
         {/* Mock scenarios hidden — re-enable in TranscriptColumn.tsx to use demo transcripts */}
         {/* <select
@@ -216,6 +218,7 @@ export function TranscriptColumn() {
           ))}
         </select> */}
 
+        {/* Speed selector hidden — re-enable with mock imports
         <select
           value={settings.mockSpeed}
           onChange={(e) => setSettings({ mockSpeed: Number(e.target.value) })}
@@ -230,6 +233,7 @@ export function TranscriptColumn() {
             </option>
           ))}
         </select>
+        */}
 
         <button
           onClick={() => {
