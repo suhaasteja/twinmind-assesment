@@ -20,7 +20,7 @@ const DEFAULT_SETTINGS: Settings = {
   suggestionsPrompt: DEFAULT_SUGGESTIONS_PROMPT,
   detailedAnswerPrompt: DEFAULT_DETAILED_ANSWER_PROMPT,
   chatPrompt: DEFAULT_CHAT_PROMPT,
-  suggestionsContextMinutes: 5,
+  suggestionsContextMinutes: 3,
   detailedContextMinutes: 0, // 0 = full transcript
   autoRefreshSeconds: 30,
   chunkSeconds: 30,

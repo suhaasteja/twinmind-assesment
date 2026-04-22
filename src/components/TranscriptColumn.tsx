@@ -56,9 +56,23 @@ export function TranscriptColumn() {
         headers: { "x-groq-key": settings.apiKey },
         body: fd,
       });
-      const data = (await res.json()) as { text?: string; error?: string };
+      // Read as text first so empty/non-JSON error bodies (e.g. 429/502
+      // from Groq under high request rate with short chunks) don't throw
+      // "Unexpected end of JSON input" before we can surface a useful error.
+      const raw = await res.text();
+      let data: { text?: string; error?: string } = {};
+      if (raw) {
+        try {
+          data = JSON.parse(raw) as { text?: string; error?: string };
+        } catch {
+          // Fall through with empty data; handled below.
+        }
+      }
       if (!res.ok) {
-        setError(data.error || `Transcribe failed (${res.status})`);
+        setError(
+          data.error ||
+            `Transcribe failed (${res.status}${res.statusText ? ` ${res.statusText}` : ""})`
+        );
         return;
       }
       ok = true;

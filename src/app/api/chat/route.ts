@@ -26,8 +26,9 @@ export async function POST(req: NextRequest) {
 
   const system = `${systemPrompt}
 
-LIVE MEETING TRANSCRIPT (most recent last):
-${transcript || "(no transcript yet)"}`;
+<transcript>
+${transcript || "(no transcript yet)"}
+</transcript>`;
 
   const res = await groqChat(apiKey, {
     model,

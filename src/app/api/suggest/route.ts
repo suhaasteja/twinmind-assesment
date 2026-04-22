@@ -82,7 +82,13 @@ async function callGroq(
   const res = await groqChat(apiKey, {
     model,
     temperature: 0.4,
-    max_tokens: 700,
+    // Groq's strict json_schema mode requires the full valid document to
+    // fit inside max_tokens — if the model runs out mid-JSON it returns
+    // `json_validate_failed` with "max completion tokens reached before
+    // generating a valid document". Worst case here is 3 items × (title
+    // ≤140 + preview ≤500) ≈ ~900 tokens once you include structure and
+    // escapes, so 1200 gives comfortable headroom.
+    max_tokens: 1200,
     response_format: useJsonSchema
       ? {
           type: "json_schema",
@@ -154,8 +160,11 @@ export async function POST(req: NextRequest) {
   }
 
   const userContent = [
-    meetingSummary ? `MEETING SO FAR (summary):\n${meetingSummary}` : null,
-    `RECENT TRANSCRIPT (most recent last):\n${transcript}`,
+    meetingSummary
+      ? `MEETING SO FAR (background context for entity/continuity recall ONLY — use this to remember names, numbers, and decisions from earlier, but do NOT anchor new suggestions here; anchor on the MOST RECENT transcript line below):\n${meetingSummary}`
+      : null,
+    `RECENT TRANSCRIPT (chronological, oldest first; timestamps are YYYY-MM-DD HH:MM:SS local 24hr):\n${transcript}`,
+    `IMPORTANT — RECENCY ANCHOR: Your 3 suggestions MUST address the topic being discussed at the MOST RECENT line (marked "← MOST RECENT"). Earlier transcript lines are context only. If the topic has shifted, prior topics are history — do NOT surface suggestions about them unless the speakers are explicitly revisiting those topics right now.`,
     previousTitles.length
       ? `RECENT PREVIOUS BATCH TITLES (do not repeat these):\n- ${previousTitles.join("\n- ")}`
       : null,

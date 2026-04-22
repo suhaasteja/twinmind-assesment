@@ -3,20 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { RefreshCw, Loader2 } from "lucide-react";
 import { useSession, useSettings } from "@/lib/store";
-import { formatTime, uid } from "@/lib/utils";
-import {
-  buildWindow,
-  containsDecisionPhrase,
-  containsNamedClaim,
-  endsWithQuestion,
-  jaccard,
-} from "@/lib/signals";
+import { formatTime, trimTranscriptForPrompt, uid } from "@/lib/utils";
+import { buildWindow, jaccard } from "@/lib/signals";
 import { buildSuggestionsPrompt, DEFAULT_SUMMARY_PROMPT } from "@/lib/prompts";
 import { Suggestion } from "@/lib/types";
 import { InfoCard, Panel, PanelHeader, TypeChip } from "./ui";
 import { WebSearchChip } from "./WebSearchChip";
 
-type RefreshTrigger = "auto" | "manual" | "interrupt";
+type RefreshTrigger = "auto" | "manual";
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -41,17 +35,16 @@ export function SuggestionsColumn({
   const [skipNotice, setSkipNotice] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(settings.autoRefreshSeconds);
 
-  // Adaptive-cadence refs. Not state because they don't drive rendering and
-  // we want reads inside refresh() to see the freshest values without
+  // Refresh bookkeeping refs. Not state because they don't drive rendering
+  // and we want reads inside refresh() to see the freshest values without
   // re-creating the handler on every tick.
   const lastRefreshAtRef = useRef(0);
   const lastSentWindowRef = useRef("");
-  const lastInterruptChunkIdRef = useRef<string | null>(null);
   // Synchronous in-flight guard. Set at function entry before any await so
-  // two triggers firing in the same tick (e.g. auto-tick + B1/B2/B4
-  // interrupt on the same chunk-add) can't both clear the gates and issue
-  // duplicate /api/suggest calls. `loadingSuggestions` in the store is not
-  // sufficient because it isn't set until after the defer sleep below.
+  // two triggers firing in the same tick (e.g. an auto-tick racing with a
+  // manual click) can't both clear the gates and issue duplicate
+  // /api/suggest calls. `loadingSuggestions` in the store is not sufficient
+  // because it isn't set until after the defer sleep below.
   const inflightRef = useRef(false);
   // Mirror of countdown so the interval reads the current value without
   // bundling side-effects into a setState updater (which can mis-fire under
@@ -219,27 +212,6 @@ export function SuggestionsColumn({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, autoRefreshPaused, settings.autoRefreshSeconds, chunks.length]);
 
-  // B1/B2/B4: jump-in triggers. When a new chunk lands that contains a
-  // question, a decision phrase, or a named/numeric claim worth verifying,
-  // fire an early refresh — subject to the in-refresh() cooldown gate. We
-  // key off the latest chunk's id so we never re-trigger for the same
-  // chunk on re-renders.
-  useEffect(() => {
-    if (!active) return;
-    if (autoRefreshPaused) return;
-    if (chunks.length === 0) return;
-    const latest = chunks[chunks.length - 1];
-    if (latest.id === lastInterruptChunkIdRef.current) return;
-    lastInterruptChunkIdRef.current = latest.id;
-    const shouldInterrupt =
-      endsWithQuestion(latest.text) ||
-      containsDecisionPhrase(latest.text) ||
-      containsNamedClaim(latest.text);
-    if (!shouldInterrupt) return;
-    void refresh("interrupt");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chunks.length, active, autoRefreshPaused]);
-
   // B5: rolling meeting summary. Every SUMMARIZE_EVERY_CHUNKS new chunks we
   // re-summarize the full transcript in a background /api/chat call. The
   // result is threaded into subsequent /api/suggest requests as
@@ -257,7 +229,14 @@ export function SuggestionsColumn({
 
     const snapshotLen = chunks.length;
     const priorSummary = s.meetingSummary;
-    const fullTranscript = chunks.map((c) => c.text).join("\n");
+    // Cap transcript size so marathon sessions don't blow the model's
+    // context window. The trim keeps the most recent tail and inserts a
+    // marker pointing the summarizer at the prior summary for older
+    // content; since this path ALSO passes `priorSummary` in the user
+    // message, the pointer is accurate.
+    const fullTranscript = trimTranscriptForPrompt(
+      chunks.map((c) => c.text).join("\n")
+    );
 
     useSession.getState().setSummarizing(true);
     void (async () => {
