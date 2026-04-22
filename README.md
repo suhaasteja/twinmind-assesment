@@ -12,7 +12,7 @@ npm run dev
 
 1. Open **Settings** and paste a **Groq API key** ([console.groq.com](https://console.groq.com)).
 2. *(Optional)* Paste a **Tavily API key** ([app.tavily.com](https://app.tavily.com)) to enable click-time web search.
-3. Click the mic — or hit **Play mock** to demo with a pre-recorded podcast transcript (1×–10× speed) without granting mic access.
+3. Click the mic to start recording.
 
 Keys stay in browser `localStorage` and are forwarded to server routes via per-request headers. No `.env` required.
 
@@ -55,16 +55,11 @@ If the key isn't set, the chip is hidden and suggestions still work (just withou
 
 - **Strict JSON schema** on suggestions, enforced with Groq's `response_format: { type: "json_object" }`.
 - **Anti-fabrication guardrail** — the prompt forbids invented numbers, dates, ranges, or provenance. Un-groundable facts defer to web search instead of being guessed.
-- **Rolling summary** compresses older transcript into ≤200 words every 6 chunks, so the suggest prompt stays small (recent ~5 min verbatim + summary of everything before).
-- **Adaptive cadence** — per-refresh cooldown, in-flight transcribe defer, Jaccard dedup on near-identical windows, and a circuit breaker on consecutive transcribe errors. See `ADAPTIVE_CADENCE.md`.
-- **Interrupt triggers** — an off-cycle refresh fires when the transcript shows an unanswered question, decision phrase, or named claim (`signals.ts`).
+- **Adaptive cadence** — per-refresh cooldown, in-flight transcribe defer, Jaccard dedup on near-identical windows, and a circuit breaker on consecutive transcribe errors.
+- **Rolling summary** — compresses older transcript into ≤200 words every 6 chunks, so the suggest prompt stays small (recent ~5 min verbatim + summary of everything before).
 - **Streaming everywhere** — suggest uses JSON-mode; chat streams Groq SSE → plain-text deltas.
 - **Parallel transcription** — each chunk uploads independently so the UI never blocks.
 - **Editable prompts** — all three system prompts live in `src/lib/prompts.ts` and are editable in Settings with a Reset button.
-
-## Mock playback
-
-If you don't want to grant mic access, **Play mock** streams a pre-recorded transcript (default: TwinMind founder podcast with speaker labels) at 1×–10×. Everything above — suggestions, chat, web search, export — works the same.
 
 ## Stack
 
@@ -88,8 +83,8 @@ src/
     layout.tsx, page.tsx    # 3-column shell
     globals.css             # dark theme tokens
   components/
-    TranscriptColumn.tsx    # mic / mock / clear
-    SuggestionsColumn.tsx   # cards, interrupt triggers, rolling summary loop
+    TranscriptColumn.tsx    # mic / clear
+    SuggestionsColumn.tsx   # cards, rolling summary loop
     ChatColumn.tsx          # streaming chat, web-search branch, sources footer
     SettingsDialog.tsx      # keys, prompts, meeting kind, cadence knobs
     WebSearchChip.tsx       # "click to web-search" chip (flagged cards)
@@ -99,9 +94,8 @@ src/
     store.ts                # zustand: settings + session
     groq.ts, audio.ts
     websearch.ts            # Tavily client + WEB SEARCH RESULTS formatter
-    signals.ts              # interrupt-trigger heuristics
+    signals.ts              # transcript windowing + dedup utilities
     export.ts               # session → JSON download
-    mockTranscripts.ts, mockPlayer.ts
     types.ts, utils.ts
 ```
 
@@ -109,9 +103,3 @@ src/
 
 Any Node host. Tested on Vercel (`npx vercel`). Build with `npm run build && npm start` elsewhere. `TAVILY_API_KEY` is an optional env var — if set, users don't need to paste the Tavily key in Settings. No other env vars required.
 
-## Further reading
-
-- `ARCHITECTURE.md` — component + data-flow diagrams.
-- `ADAPTIVE_CADENCE.md` — refresh-cadence scenarios and tuning.
-- `SYSTEM_DESIGN.md` — subsystem contracts (audio, suggest loop, chat, web search, state).
-- `DESIGN.md`, `PRODUCT_ALIGNMENT.md` — design journal.
